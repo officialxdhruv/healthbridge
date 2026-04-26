@@ -1,13 +1,11 @@
+import express from "express";
 
-const addDoctor = async(req,res) =>{
+const addDoctor = async (req: express.Request, res: express.Response) => {
     try {
-
-        const {name,email,password,speciality,degree,experience,about,fees,address} = req.body
-        
-    
+        const { name, email, password, speciality, degree, experience, about, fees, address } = req.body
     } catch (error) {
-        
+
     }
 }
 
-export {addDoctor}
+export { addDoctor }
