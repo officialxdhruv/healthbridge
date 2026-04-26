@@ -2,6 +2,9 @@
   "name": "backend",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "dev": "bun --watch --env-file=.env index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/cors": "^2.8.19",
@@ -11,7 +14,6 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "frontend" : "workspace:*",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
