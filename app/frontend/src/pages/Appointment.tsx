@@ -5,6 +5,8 @@ import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router";
 
 export default function Appointment() {
+    const daysOfWeeks = ['SUN', 'MON', "TUE", "WED", "THU", "FRI", "SAT"]
+    
     const { docId } = useParams();
     const { doctors, currencySybmol } = useContext(AppContext);
     const docInfo = doctors.find(doc => doc._id === docId);

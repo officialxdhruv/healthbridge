@@ -3,11 +3,17 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "packageManager": "bun@1.3.8",
   "workspaces": [
     "app/*"
   ],
+  "scripts": {
+    "dev": "turbo dev --ui tui",
+    "check:web": "turbo typecheck --filter=@healthbridge/frontend"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "turbo": "^2.9.6"
   },
   "peerDependencies": {
     "typescript": "^5"
