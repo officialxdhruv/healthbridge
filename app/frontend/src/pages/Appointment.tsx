@@ -1,17 +1,20 @@
 import { assets } from "@/assets/assets_frontend/assets";
+import RelatedDoctors from "@/components/RelatedDoctors";
 import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { AppContext } from "@/context/AppContext";
+import { cn } from "@/lib/utils";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router";
 
 export default function Appointment() {
     const daysOfWeeks = ['SUN', 'MON', "TUE", "WED", "THU", "FRI", "SAT"]
-    
+
     const { docId } = useParams();
     const { doctors, currencySybmol } = useContext(AppContext);
     const docInfo = doctors.find(doc => doc._id === docId);
 
-    const [docSlots, setDocSlots] = useState([]);
+    const [docSlots, setDocSlots] = useState<{ dateTime: Date, time: string }[][]>([]);
     const [slotIndex, setSlotIndex] = useState(0);
     const [slotsTime, SetSlotsTime] = useState('');
 
@@ -19,20 +22,20 @@ export default function Appointment() {
         setDocSlots([])
 
         // getting current data
-        let tody = new Date()
+        let today = new Date()
 
         for (let i = 0; i < 7; i++) {
             // getting data with index
-            let currentDate = new Date(tody)
-            currentDate.setDate(tody.getDate() + i);
+            let currentDate = new Date(today)
+            currentDate.setDate(today.getDate() + i);
 
             // setting end time of the date with index
             let endTime = new Date();
-            endTime.setDate(tody.getDate() + i)
+            endTime.setDate(today.getDate() + i)
             endTime.setHours(21, 0, 0, 0)
 
             // setting hours
-            if (tody.getDate() === currentDate.getDate()) {
+            if (today.getDate() === currentDate.getDate()) {
                 currentDate.setHours(currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10)
                 currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0)
             } else {
@@ -43,7 +46,7 @@ export default function Appointment() {
             let timeSlots = []
 
             while (currentDate < endTime) {
-                let formattedTime = currentDate.toLocaleDateString([], { hour: '2-digit', minute: '2-digit' })
+                let formattedTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
                 timeSlots.push({
                     dateTime: new Date(currentDate),
@@ -90,6 +93,37 @@ export default function Appointment() {
                     <p className="font-medium mt-4">Appointment fee: <span>{currencySybmol}{docInfo?.fees}</span></p>
                 </div>
             </div>
+
+            {/* Booking Slots */}
+            <div className="sm:ml-72 sm:pl-4 mt-4 font-medium text-muted-foreground">
+                <p>Booking slots</p>
+                <div className="flex gap-3 items-center w-full overflow-x-scroll mt-4">
+                    {docSlots.length && docSlots.map((item, index) => (
+                        <div onClick={() => setSlotIndex(index)} key={index} className={cn("flex flex-col text-center rounded-full min-w-16",
+                            slotIndex === index ? buttonVariants({ variant: "default" }) : buttonVariants({ variant: "outline" }),
+                            "py-10"
+                        )}>
+                            <p>{item[0] && daysOfWeeks[item[0].dateTime.getDay()]}</p>
+                            <p>{item[0] && item[0].dateTime.getDate()}</p>
+                        </div>
+                    ))}
+                </div>
+                <div className="flex items-center gap-3 w-full overflow-x-scroll mt-4">
+                    {docSlots.length && docSlots[slotIndex].map((slot, index) => (
+                        <p onClick={() => SetSlotsTime(slot.time)} key={index} className={cn("text-sm font-light shrink-0 pl-0 pr-4 py-2 rounded-full cursor-pointer",
+                            slot.time === slotsTime ? buttonVariants({ variant: "default" }) : buttonVariants({ variant: "outline" })
+                        )}>
+                            {slot.time.toLowerCase()}
+                        </p>
+                    ))}
+                </div>
+
+                <Button className="my-6">Book an appointment</Button>
+            </div>
+
+            {/* Related Doctors */}
+
+            <RelatedDoctors docId={docId ?? ""} speciality={docInfo?.speciality ?? ""} />
 
 
         </div>

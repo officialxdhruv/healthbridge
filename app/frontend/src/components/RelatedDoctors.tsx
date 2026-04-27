@@ -1,19 +1,28 @@
+import { AppContext } from "@/context/AppContext"
+import { useContext } from "react"
 import { Card, CardContent } from "./ui/card";
-import { Button } from "./ui/button";
 import { useNavigate } from "react-router";
-import { useContext } from "react";
-import { AppContext } from "@/context/AppContext";
+import { Button } from "./ui/button";
+import type { Doctors } from "@/assets/assets_frontend/assets";
 
-export default function TopDoctors() {
+export default function RelatedDoctors({ docId, speciality }: { docId: string, speciality: string }) {
+
+    const { doctors } = useContext(AppContext)
     const navigate = useNavigate();
-    const { doctors } = useContext(AppContext);
+
+
+    let doctorsData: Doctors = [];
+    if (doctors.length > 0 && speciality) {
+        doctorsData = doctors.filter((doc) => doc.speciality === speciality && doc._id !== docId)
+    }
+
     return (
         <div className="flex flex-col items-center gap-4 my-16 md:mx-10">
             <h1 className="text-3xl font-medium">Top Doctor to Book</h1>
             <p className="sm:w-1/3 text-center text-sm">Simply browse through our extensive list of trusted doctors</p>
             <div className="w-full grid grid-cols-5 gap-4 pt-5 gap-y-6 px-3 sm:px-0">
-                {doctors.slice(0, 10).map((item, index) => (
-                    <Card onClick={() => { navigate(`/appointment/${item._id}`); scrollTo({ left: 0, top: 0, behavior: "instant" }) }} className="cursor-pointer hover:-translate-y-2.5 transition-all duration-500" key={index}>
+                {doctorsData.slice(0, 5).map((item, index) => (
+                    <Card onClick={() => { navigate(`/appointment/${item._id}`); scrollTo(0, 0) }} className="cursor-pointer hover:-translate-y-2.5 transition-all duration-500" key={index}>
                         <img className="bg-accent" src={item.image} />
                         <CardContent>
                             <div className="flex items-center gap-2 text-sm text-center text-green-500 ">
