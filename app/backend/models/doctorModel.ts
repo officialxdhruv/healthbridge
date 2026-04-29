@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { model, type HydratedDocument, type InferSchemaType } from "mongoose";
 
 const doctorSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -16,6 +16,6 @@ const doctorSchema = new mongoose.Schema({
     slots_booked: { type: Object, default: {} }
 }, { minimize: false })
 
-const doctorModel = mongoose.models.doctor || mongoose.model('doctor', doctorSchema)
-
-export default doctorModel 
+export const Doctor = model("doctor", doctorSchema);
+export type DoctorSchema = InferSchemaType<typeof doctorSchema>;
+export type IDoctor = HydratedDocument<InferSchemaType<typeof doctorSchema>>;

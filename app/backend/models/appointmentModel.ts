@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose, { model, type HydratedDocument, type InferSchemaType } from "mongoose"
 
 const appointmentSchema = new mongoose.Schema({
     userId: { type: String, required: true },
@@ -14,5 +14,5 @@ const appointmentSchema = new mongoose.Schema({
     isCompleted: { type: Boolean, default: false }
 })
 
-const appointmentModel = mongoose.models.appointment || mongoose.model("appointment", appointmentSchema)
-export default appointmentModel
+export const Appointment = model("appointment", appointmentSchema);
+export type IAppointment = HydratedDocument<InferSchemaType<typeof appointmentSchema>>;

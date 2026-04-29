@@ -1,24 +1,26 @@
+import { Doctor } from "@/models/doctorModel";
+import { compare } from "bcrypt-ts";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-import doctorModel from "../models/doctorModel.js";
-import appointmentModel from "../models/appointmentModel.js";
+import express from "express";
+import { Appointment } from "@/models/appointmentModel";
+import { env } from "@/env";
 
 // Doctor login
-const loginDoctor = async (req, res) => {
+const loginDoctor = async (req: express.Request, res: express.Response) => {
   try {
     const { email, password } = req.body;
-    const user = await doctorModel.findOne({ email });
+    const user = await Doctor.findOne({ email });
 
     if (!user) {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id }, env.JWT_SECRET);
     res.json({ success: true, token });
   } catch (error) {
     console.error(error);
@@ -27,10 +29,10 @@ const loginDoctor = async (req, res) => {
 };
 
 // Get doctor's appointments
-const appointmentsDoctor = async (req, res) => {
+const appointmentsDoctor = async (req: express.Request, res: express.Response) => {
   try {
     const docId = req.user.id;
-    const appointments = await appointmentModel.find({ docId });
+    const appointments = await Appointment.find({ docId });
     res.json({ success: true, appointments });
   } catch (error) {
     console.error(error);
@@ -39,17 +41,17 @@ const appointmentsDoctor = async (req, res) => {
 };
 
 // Cancel appointment
-const appointmentCancel = async (req, res) => {
+const appointmentCancel = async (req: express.Request, res: express.Response) => {
   try {
     const docId = req.user.id;
     const { appointmentId } = req.body;
 
-    const appointment = await appointmentModel.findById(appointmentId);
+    const appointment = await Appointment.findById(appointmentId);
     if (!appointment || appointment.docId.toString() !== docId) {
       return res.status(403).json({ success: false, message: "Invalid doctor or appointment" });
     }
 
-    await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true });
+    await Appointment.findByIdAndUpdate(appointmentId, { cancelled: true });
     res.json({ success: true, message: "Appointment Cancelled" });
   } catch (error) {
     console.error(error);
@@ -58,17 +60,17 @@ const appointmentCancel = async (req, res) => {
 };
 
 // Complete appointment
-const appointmentComplete = async (req, res) => {
+const appointmentComplete = async (req: express.Request, res: express.Response) => {
   try {
     const docId = req.user.id;
     const { appointmentId } = req.body;
 
-    const appointment = await appointmentModel.findById(appointmentId);
+    const appointment = await Appointment.findById(appointmentId);
     if (!appointment || appointment.docId.toString() !== docId) {
       return res.status(403).json({ success: false, message: "Invalid doctor or appointment" });
     }
 
-    await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true });
+    await Appointment.findByIdAndUpdate(appointmentId, { isCompleted: true });
     res.json({ success: true, message: "Appointment Completed" });
   } catch (error) {
     console.error(error);
@@ -77,9 +79,9 @@ const appointmentComplete = async (req, res) => {
 };
 
 // Get all doctors (for frontend list)
-const doctorList = async (req, res) => {
+const doctorList = async (req: express.Request, res: express.Response) => {
   try {
-    const doctors = await doctorModel.find({}).select("-password -email");
+    const doctors = await Doctor.find({}).select("-password -email");
     res.json({ success: true, doctors });
   } catch (error) {
     console.error(error);
@@ -88,7 +90,7 @@ const doctorList = async (req, res) => {
 };
 
 // Toggle doctor's availability
-  const changeAvailability = async (req, res) => {
+const changeAvailability = async (req: express.Request, res: express.Response) => {
   try {
     const { docId } = req.body;
 
@@ -96,7 +98,7 @@ const doctorList = async (req, res) => {
       return res.status(400).json({ success: false, message: "Doctor ID missing" });
     }
 
-    const doctor = await doctorModel.findById(docId);
+    const doctor = await Doctor.findById(docId);
 
     if (!doctor) {
       return res.status(404).json({ success: false, message: "Doctor not found" });
@@ -114,10 +116,10 @@ const doctorList = async (req, res) => {
 
 
 // Get doctor's profile
-const doctorProfile = async (req, res) => {
+const doctorProfile = async (req: express.Request, res: express.Response) => {
   try {
     const docId = req.user.id;
-    const profile = await doctorModel.findById(docId).select("-password");
+    const profile = await Doctor.findById(docId).select("-password");
     res.json({ success: true, profileData: profile });
   } catch (error) {
     console.error(error);
@@ -126,12 +128,12 @@ const doctorProfile = async (req, res) => {
 };
 
 // Update doctor's profile
-const updateDoctorProfile = async (req, res) => {
+const updateDoctorProfile = async (req: express.Request, res: express.Response) => {
   try {
     const docId = req.user.id;
     const { fees, address, available, about } = req.body; // ✅ include `about`
 
-    await doctorModel.findByIdAndUpdate(docId, {
+    await Doctor.findByIdAndUpdate(docId, {
       fees,
       address,
       available,
@@ -147,10 +149,10 @@ const updateDoctorProfile = async (req, res) => {
 
 
 // Get dashboard data
-const doctorDashboard = async (req, res) => {
+const doctorDashboard = async (req: express.Request, res: express.Response) => {
   try {
     const docId = req.user.id;
-    const appointments = await appointmentModel.find({ docId });
+    const appointments = await Appointment.find({ docId });
 
     let earnings = 0;
     const patientSet = new Set();

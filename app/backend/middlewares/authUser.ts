@@ -1,13 +1,15 @@
+import { env } from '@/env'
 import jwt from 'jsonwebtoken'
+import express from 'express'
 
 // user authentication middleware
-const authUser = async (req, res, next) => {
+async function authUser(req: express.Request, res: express.Response, next: express.NextFunction) {
     const { token } = req.headers
     if (!token) {
         return res.json({ success: false, message: 'Not Authorized Login Again' })
     }
     try {
-        const token_decode = jwt.verify(token, process.env.JWT_SECRET)
+        const token_decode = jwt.verify(token, env.JWT_SECRET)
 
         // ✅ Fix: Ensure req.body is defined before assigning to it
         if (!req.body) req.body = {}

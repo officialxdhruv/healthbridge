@@ -1,7 +1,13 @@
 import jwt from 'jsonwebtoken';
+import type express from "express";
+import { env } from '@/env';
 
 // Doctor authentication middleware
-const authDoctor = async (req, res, next) => {
+async function authDoctor(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+) {
     try {
         // Check for token in Authorization header
         const authHeader = req.headers.authorization || req.headers.dtoken;
@@ -16,10 +22,10 @@ const authDoctor = async (req, res, next) => {
             : authHeader;
 
         // Verify token and attach user info to req
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, env.JWT_SECRET);
         req.user = { id: decoded.id };
         next();
-    } catch (error : any) {
+    } catch (error: any) {
         console.error('Auth Error:', error.message);
         res.status(401).json({ success: false, message: 'Invalid or expired token' });
     }
