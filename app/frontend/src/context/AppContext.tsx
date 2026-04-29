@@ -1,13 +1,97 @@
-import { createContext } from "react";
-import { doctors, type Doctors } from "../assets/assets_frontend/assets.ts";
+import { createContext, useEffect, useState } from "react";
+import { doctors as docData, type Doctors } from "../assets/assets_frontend/assets.ts";
+import axios from 'axios'
+import { toast } from "sonner";
+
+type AppContextType = {
+    doctors: Doctors;
+    currencySymbol: string;
+    backendUrl: string;
+
+    token: string;
+    setToken: React.Dispatch<React.SetStateAction<string>>;
+
+    userData: any;
+    setUserData: React.Dispatch<React.SetStateAction<any>>;
+
+    getDoctorsData: () => Promise<void>;
+    loadUserProfileData: () => Promise<void>;
+};
 
 
-export const AppContext = createContext<{ doctors: Doctors, currencySybmol: string }>({ doctors: [], currencySybmol: "$" });
+export const AppContext = createContext<AppContextType>({
+    doctors: [],
+    currencySymbol: "$",
+    backendUrl: "",
+
+    token: "",
+    setToken: () => { },
+
+    userData: null,
+    setUserData: () => { },
+
+    getDoctorsData: async () => { },
+    loadUserProfileData: async () => { }
+});
 
 export default function AppContextProvider({ children }: { children: React.ReactNode }) {
-    const currencySybmol = "$";
+    const currencySymbol = '₹';
+    const backendUrl = import.meta.env.VITE_BACKEND_URL
+
+    console.log("Backend URL:", backendUrl)
+    const [doctors, setDoctors] = useState(docData)
+    const [token, setToken] = useState(localStorage.getItem('token') || '')
+    const [userData, setUserData] = useState(null)
+
+    const getDoctorsData = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/doctor/list')
+            if (data.success) {
+                setDoctors(data.doctors)
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error: any) {
+            console.log(error)
+            toast.error(error.message)
+        }
+    }
+
+    const loadUserProfileData = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/user/get-profile', {
+                headers: { token }
+            })
+
+            if (data.success) {
+                const safeUserData = {
+                    ...data.userData,
+                    address: data.userData.address || { line1: '', line2: '' },
+                    gender: data.userData.gender || '',
+                    dob: data.userData.dob || ''
+                }
+                setUserData(safeUserData)
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error: any) {
+            console.log(error)
+            toast.error(error.message)
+        }
+    }
+
+    useEffect(() => {
+        getDoctorsData()
+    }, [])
+
+    useEffect(() => {
+        if (token) {
+            loadUserProfileData()
+        }
+    }, [token])
+
     return (
-        <AppContext.Provider value={{ doctors, currencySybmol }}>
+        <AppContext.Provider value={{ doctors, getDoctorsData, currencySymbol, backendUrl, token, setToken, userData, setUserData, loadUserProfileData }}>
             {children}
         </AppContext.Provider>
     )
