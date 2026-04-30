@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 import express from "express"
-import { env } from "@/env"
+import { env } from "@/src/env"
 
 // admin authentication middleware
 async function authAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {

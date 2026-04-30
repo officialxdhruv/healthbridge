@@ -3,7 +3,7 @@ import { compare } from "bcrypt-ts";
 import jwt from "jsonwebtoken";
 import express from "express";
 import { Appointment } from "@/models/appointmentModel";
-import { env } from "@/env";
+import { env } from "@/src/env";
 
 // Doctor login
 const loginDoctor = async (req: express.Request, res: express.Response) => {

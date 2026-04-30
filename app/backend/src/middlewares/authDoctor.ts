@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import type express from "express";
-import { env } from '@/env';
+import { env } from '@/src/env';
 
 // Doctor authentication middleware
 async function authDoctor(
