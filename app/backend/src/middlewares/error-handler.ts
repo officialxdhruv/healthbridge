@@ -19,10 +19,12 @@ export default function errorHandler(
         next(error);
         return;
     }
-
-    // log full error in development
-    if (env.NODE_ENV === "development") {
+    if (env.NODE_ENV === "debug") {
         console.error(error);
+    }
+
+    if (env.NODE_ENV === "development") {
+        console.log(error);
     }
 
     if (error instanceof CustomError) {
@@ -31,7 +33,6 @@ export default function errorHandler(
             error: {
                 message: error.message,
                 code: error.code,
-                ...(env.NODE_ENV === "development" && { stack: error.stack }),
             }
         });
         return;
@@ -41,7 +42,7 @@ export default function errorHandler(
         success: false,
         error: {
             message: getErrorMessage(error),
-            ...(env.NODE_ENV === "development" && {
+            ...(env.NODE_ENV === "debug" && {
                 stack: error instanceof Error ? error.stack : undefined
             }),
         }

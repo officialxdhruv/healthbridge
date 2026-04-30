@@ -1,10 +1,9 @@
 import express from 'express'
 import cors from 'cors'
-
 import errorHandler from '@/middlewares/error-handler';
-import v1 from '@/routes/v1';
+import v1 from '@/routes/v1/routes';
 import { env } from '@/env';
-import EntityNotFoundError from './errors/EntityNotFoundError';
+import EntityNotFoundError from '@/errors/EntityNotFoundError';
 
 export const createServer = () => {
     const app = express();
@@ -26,10 +25,10 @@ export const createServer = () => {
         res.status(200).json({ ok: true, environment: env.NODE_ENV });
     });
 
-    app.use('/testing', (req, res) => {
-        throw new EntityNotFoundError("Testing error");
-        res.status(200).json({ message: 'API is working' });
-    });
+    // app.use('/testing', (req, res) => {
+    //     throw new EntityNotFoundError("Testing error");
+    //     res.status(200).json({ message: 'API is working' });
+    // });
 
     // 404 handler
     app.use((_req, res) => {

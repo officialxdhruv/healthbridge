@@ -1,23 +1,28 @@
-import jwt from "jsonwebtoken"
-import express from "express"
-import { env } from "@/env"
+import { ForbiddenError, UnauthorizedError } from "@/errors";
+import { env } from "@/env";
+import type { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-// admin authentication middleware
-async function authAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
-    try {
-        const { atoken } = req.headers
-        if (!atoken) {
-            return res.json({ success: false, message: 'Not Authorized Login Again' })
-        }
-        const token_decode = jwt.verify(atoken, env.JWT_SECRET)
-        if (token_decode !== env.ADMIN_EMAIL + env.ADMIN_PASSWORD) {
-            return res.json({ success: false, message: 'Not Authorized Login Again' })
-        }
-        next()
-    } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+async function authAdmin(req: Request, res: Response, next: NextFunction) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        throw new UnauthorizedError("No token provided");
     }
+
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+        throw new UnauthorizedError("No token provided");
+    }
+
+    const decoded = jwt.verify(token, env.JWT_SECRET) as unknown as { email: string, role: string };
+
+    if (decoded.role !== "admin" || decoded.email !== env.ADMIN_EMAIL) {
+        throw new ForbiddenError("Not authorized");
+    }
+
+    next();
 }
 
 export default authAdmin;

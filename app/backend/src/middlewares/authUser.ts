@@ -1,25 +1,30 @@
 import { env } from '@/env'
 import jwt from 'jsonwebtoken'
-import express from 'express'
+import { Request, Response, NextFunction } from 'express'
+import { ForbiddenError, UnauthorizedError } from '@/errors';
 
-// user authentication middleware
-async function authUser(req: express.Request, res: express.Response, next: express.NextFunction) {
-    const { token } = req.headers
+async function authUser(req: Request, res: Response, next: NextFunction) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        throw new UnauthorizedError("No token provided");
+    }
+
+    const token = authHeader.split(" ")[1];
+
     if (!token) {
-        return res.json({ success: false, message: 'Not Authorized Login Again' })
+        throw new UnauthorizedError("No token provided");
     }
-    try {
-        const token_decode = jwt.verify(token, env.JWT_SECRET)
 
-        // ✅ Fix: Ensure req.body is defined before assigning to it
-        if (!req.body) req.body = {}
+    const decoded = jwt.verify(token, env.JWT_SECRET) as unknown as { id: string; role: string };
 
-        req.body.userId = token_decode.id
-        next()
-    } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+    if (decoded.role !== "user") {
+        throw new ForbiddenError("Access denied");
     }
+
+    req.user = { id: decoded.id, role: decoded.role };
+
+    next();
 }
 
-export default authUser
+export default authUser;

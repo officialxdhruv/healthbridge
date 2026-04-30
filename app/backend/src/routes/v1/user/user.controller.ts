@@ -1,102 +1,93 @@
-import validator from 'validator'
 import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from 'cloudinary'
 // import razorpay from 'razorpay';
 import { User } from '@/models/userModel';
 import { env } from '@/env';
-import type express from "express";
+import { Request, Response } from "express";
 import { Doctor } from '@/models/doctorModel';
 import { Appointment } from '@/models/appointmentModel';
 import { compare, genSalt, hash } from 'bcrypt-ts';
+import { loginSchema, registerSchema } from '@/types/user.types';
+import { EntityNotFoundError, UnauthorizedError, ValidationError } from '@/errors';
 
 
 
 // API to register user
-export const registerUser = async (req: express.Request, res: express.Response) => {
-
-    try {
-        const { name, email, password } = req.body;
-
-        // checking for all data to register user
-        if (!name || !email || !password) {
-            return res.json({ success: false, message: 'Missing Details' })
-        }
-
-        // validating email format
-        if (!validator.isEmail(email)) {
-            return res.json({ success: false, message: "Please enter a valid email" })
-        }
-
-        // validating strong password
-        if (password.length < 8) {
-            return res.json({ success: false, message: "Please enter a strong password" })
-        }
-
-        // hashing user password
-        const salt = await genSalt(10); // the more no. round the more time it will take
-        const hashedPassword = await hash(password, salt)
-
-        const userData = {
-            name,
-            email,
-            password: hashedPassword,
-        }
-
-        const newUser = new User(userData)
-        const user = await newUser.save()
-        const token = jwt.sign({ id: user._id }, env.JWT_SECRET)
-
-        res.json({ success: true, token })
-
-    } catch (error: any) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+export async function registerUser(req: Request, res: Response) {
+    const result = registerSchema.safeParse(req.body);
+    console.log(result)
+    
+    if (!result.success) {
+        throw new ValidationError(result.error.issues[0]?.message ?? "Validation failed");
     }
+
+    const { name, email, password } = result.data;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        throw new ValidationError("Email already in use");
+    }
+
+    const salt = await genSalt(10);
+    const hashedPassword = await hash(password, salt);
+
+    const newUser = new User({ name, email, password: hashedPassword });
+    const user = await newUser.save();
+
+    const token = jwt.sign(
+        { id: user._id, role: "user" },
+        env.JWT_SECRET,
+        { expiresIn: "7d" }
+    );
+
+    res.status(201).json({ success: true, token });
 }
 
-// API to login user
-export const loginUser = async (req: express.Request, res: express.Response) => {
+export async function loginUser(req: Request, res: Response) {
+    const result = loginSchema.safeParse(req.body);
 
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email })
-
-        if (!user) {
-            return res.json({ success: false, message: "User does not exist" })
-        }
-
-        const isMatch = await compare(password, user.password)
-
-        if (isMatch) {
-            const token = jwt.sign({ id: user._id }, env.JWT_SECRET)
-            res.json({ success: true, token })
-        }
-        else {
-            res.json({ success: false, message: "Invalid credentials" })
-        }
-    } catch (error: any) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+    if (!result.success) {
+        throw new ValidationError(result.error.issues[0]?.message ?? "Validation failed");
     }
+
+    const { email, password } = result.data;
+
+    const user = await User.findOne({ email }).select("+password");  // password is select:false
+
+    if (!user) {
+        throw new EntityNotFoundError("User does not exist");
+    }
+
+    const isMatch = await compare(password, user.password);
+
+    if (!isMatch) {
+        throw new UnauthorizedError("Invalid credentials");
+    }
+
+    const token = jwt.sign(
+        { id: user._id, role: "user" },
+        env.JWT_SECRET,
+        { expiresIn: "7d" }
+    );
+
+    res.json({ success: true, token });
 }
 
-// API to get user profile data
-export const getProfile = async (req: express.Request, res: express.Response) => {
+export async function getProfile(req: Request, res: Response) {
+    const { userId } = req.body;
 
-    try {
-        const { userId } = req.body
-        const userData = await User.findById(userId).select('-password')
+    const user = await User.findById(userId);
 
-        res.json({ success: true, userData })
-
-    } catch (error: any) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+    if (!user) {
+        throw new EntityNotFoundError("User not found");
     }
+
+    res.json({ success: true, user });
 }
+
 
 // API to update user profile
-export const updateProfile = async (req: express.Request, res: express.Response) => {
+export async function updateProfile(req: Request, res: Response) {
 
     try {
 
@@ -127,7 +118,7 @@ export const updateProfile = async (req: express.Request, res: express.Response)
 }
 
 // API to book appointment 
-export const bookAppointment = async (req: express.Request, res: express.Response) => {
+export async function bookAppointment(req: Request, res: Response) {
 
     try {
 
@@ -184,7 +175,7 @@ export const bookAppointment = async (req: express.Request, res: express.Respons
 }
 
 // API to cancel appointment
-export const cancelAppointment = async (req: express.Request, res: express.Response) => {
+export async function cancelAppointment(req: Request, res: Response) {
     try {
 
         const { userId, appointmentId } = req.body
@@ -217,7 +208,7 @@ export const cancelAppointment = async (req: express.Request, res: express.Respo
 }
 
 // API to get user appointments for frontend my-appointments page
-export const listAppointment = async (req: express.Request, res: express.Response) => {
+export async function listAppointment(req: Request, res: Response) {
     try {
 
         const { userId } = req.body

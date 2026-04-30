@@ -14,7 +14,7 @@ const doctorSchema = new mongoose.Schema({
     address: {
         line1: { type: String, required: true },
         line2: { type: String },
-        city: { type: String, required: true },
+        city: { type: String },
         state: { type: String },
     },
     // map of slotDate -> array of booked slot times e.g. { "2024-01-01": ["10:00", "11:00"] }

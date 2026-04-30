@@ -1,35 +1,31 @@
 import jwt from 'jsonwebtoken';
-import type express from "express";
 import { env } from '@/env.js';
+import { Request, Response, NextFunction } from 'express';
+import { ForbiddenError, UnauthorizedError } from '@/errors';
 
+async function authDoctor(req: Request, res: Response, next: NextFunction) {
 
-// Doctor authentication middleware
-async function authDoctor(
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-) {
-    try {
-        // Check for token in Authorization header
-        const authHeader = req.headers.authorization || req.headers.dtoken;
+    const authHeader = req.headers.authorization;
 
-        if (!authHeader) {
-            return res.status(401).json({ success: false, message: 'Authorization token missing' });
-        }
-
-        // Extract token from 'Bearer <token>' format or use directly if passed via custom header
-        const token = authHeader.startsWith('Bearer ')
-            ? authHeader.split(' ')[1]
-            : authHeader;
-
-        // Verify token and attach user info to req
-        const decoded = jwt.verify(token, env.JWT_SECRET);
-        req.user = { id: decoded.id };
-        next();
-    } catch (error: any) {
-        console.error('Auth Error:', error.message);
-        res.status(401).json({ success: false, message: 'Invalid or expired token' });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        throw new UnauthorizedError("No token provided");
     }
+
+    const token = authHeader.split(' ')[1];
+
+    if (!token) {
+        throw new UnauthorizedError("No token provided");
+    }
+
+    const decoded = jwt.verify(token, env.JWT_SECRET) as unknown as { id: string, role: string };
+
+    if (decoded.role !== "doctor") {
+        throw new ForbiddenError("Access denied");
+    }
+
+    req.user = { id: decoded.id, role: decoded.role };
+    
+    next();
 };
 
 export default authDoctor;

@@ -7,4 +7,5 @@ export default function connectCloudinary() {
         api_key: env.CLOUDINARY_API_KEY,
         api_secret: env.CLOUDINARY_API_SECRET
     })
+    console.log("Cloudinary connected");
 }
