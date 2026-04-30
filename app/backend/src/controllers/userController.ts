@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from 'cloudinary'
 // import razorpay from 'razorpay';
 import { User } from '@/models/userModel';
-import { env } from '@/src/env';
+import { env } from '@/env';
 import type express from "express";
 import { Doctor } from '@/models/doctorModel';
 import { Appointment } from '@/models/appointmentModel';

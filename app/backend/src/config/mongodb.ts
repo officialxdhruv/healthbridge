@@ -1,9 +1,9 @@
-import { env } from "@/src/env";
+import { env } from "@/env";
 import mongoose from "mongoose";
 
 const connectDB = async () => {
     try {
-        await mongoose.connect(env.MONGODB_URI || "mongodb://localhost:27017/healthbridge");
+        await mongoose.connect(`${env.MONGODB_URI}/healthbridge`);
         console.log("Database Connected");
     } catch (error) {
         console.error("Database connection error:", error);

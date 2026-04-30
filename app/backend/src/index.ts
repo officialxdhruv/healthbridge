@@ -1,43 +1,22 @@
-import express from 'express'
-import cors from 'cors'
-import { env } from '@/src/env'
-import connectCloudinary from '@/config/cloudinary'
-import adminRouter from '@/routes/adminRoute'
-import doctorRouter from '@/routes/doctorRoute'
-import userRouter from '@/routes/userRoute'
+import { env } from '@/env'
 import connectDB from '@/config/mongodb'
+import { createServer } from '@/server'
+import connectCloudinary from '@/config/cloudinary'
 
-// app config
-const app = express()
-const PORT = env.PORT || 3000
+const PORT = env.PORT
 
-// connectCloudinary()
-
-// middlewares
-app.use(express.json())
-app.use(
-  cors({
-    origin: env.FRONTEND_URL || "http://localhost:5173",
-    credentials: true,
-  }),
-);
-
-// Routes
-app.use('/api/admin', adminRouter)
-app.use('/api/doctor', doctorRouter)
-app.use("/api/user", userRouter)
-app.use('/testing', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  try {
-    throw new Error('Oops! Something went wrong.');
-  } catch (error) {
-    next(error)
-  }
-  res.status(200).json({ message: 'API is working' });
-});
-
-
-app.listen(PORT, () => {
-  console.log(`Server started on PORT:${PORT}`);
-  connectDB();
+const bootstrap = async () => {
+  await connectDB();
   connectCloudinary();
-})
+
+  const server = createServer();
+
+  server.listen(PORT, () => {
+    console.log(`API running on : ${PORT}`);
+  });
+};
+
+bootstrap().catch((err) => {
+  console.error('Failed to start server : ', err);
+  process.exit(1);
+});

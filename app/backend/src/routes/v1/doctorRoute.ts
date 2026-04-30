@@ -1,6 +1,6 @@
 import express from 'express';
-import { loginDoctor, appointmentsDoctor, appointmentCancel, doctorList, appointmentComplete, doctorDashboard, doctorProfile, updateDoctorProfile, changeAvailability } from '../controllers/doctorController.js';
-import authDoctor from '../middlewares/authDoctor.js';
+import { loginDoctor, appointmentsDoctor, appointmentCancel, doctorList, appointmentComplete, doctorDashboard, doctorProfile, updateDoctorProfile, changeAvailability } from '../../controllers/doctorController.js';
+import authDoctor from '../../middlewares/authDoctor.js';
 const doctorRouter = express.Router();
 
 doctorRouter.post("/login", loginDoctor)

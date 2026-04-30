@@ -1,4 +1,4 @@
-import { env } from '@/src/env'
+import { env } from '@/env'
 import jwt from 'jsonwebtoken'
 import express from 'express'
 

@@ -5,7 +5,7 @@ import { Doctor } from "@/models/doctorModel";
 import express from "express";
 import { Appointment } from "@/models/appointmentModel";
 import { User } from "@/models/userModel";
-import { env } from "@/src/env";
+import { env } from "@/env";
 import { genSalt, hash } from "bcrypt-ts";
 
 // API for admin login
