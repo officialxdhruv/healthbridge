@@ -19,20 +19,7 @@ type AppContextType = {
 };
 
 
-export const AppContext = createContext<AppContextType>({
-    doctors: [],
-    currencySymbol: "$",
-    backendUrl: "",
-
-    token: "",
-    setToken: () => { },
-
-    userData: null,
-    setUserData: () => { },
-
-    getDoctorsData: async () => { },
-    loadUserProfileData: async () => { }
-});
+export const AppContext = createContext<null | AppContextType>(null);
 
 export default function AppContextProvider({ children }: { children: React.ReactNode }) {
     const currencySymbol = '₹';

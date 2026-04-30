@@ -3,7 +3,6 @@ import cors from 'cors'
 import errorHandler from '@/middlewares/error-handler';
 import v1 from '@/routes/v1/routes';
 import { env } from '@/env';
-import EntityNotFoundError from '@/errors/EntityNotFoundError';
 import cookieParser from 'cookie-parser';
 
 export const createServer = () => {
@@ -16,21 +15,16 @@ export const createServer = () => {
         .use(express.urlencoded({ extended: true }))
         .use(
             cors({
-                origin: env.FRONTEND_URL,  // handle fallback in env validation
+                origin: env.FRONTEND_URL,
                 credentials: true,
             }),
         );
 
-    app.use("/api/v1", v1); // consistent versioning from the start
+    app.use("/api/v1", v1);
 
     app.get('/health', (_req, res) => {
         res.status(200).json({ ok: true, environment: env.NODE_ENV });
     });
-
-    // app.use('/testing', (req, res) => {
-    //     throw new EntityNotFoundError("Testing error");
-    //     res.status(200).json({ message: 'API is working' });
-    // });
 
     // 404 handler
     app.use((_req, res) => {

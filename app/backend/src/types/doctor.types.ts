@@ -27,3 +27,20 @@ export const loginDoctorSchema = z.object({
     email: z.email("Please enter a valid email"),
     password: z.string().min(1, "Password is required"),
 });
+
+export const appointmentIdSchema = z.object({
+    appointmentId: z.string().min(1, "Appointment ID is required"),
+})
+
+export const updateDoctorSchema = z.object({
+    fees: z.coerce.number().min(0, "Fees must be a positive number"),
+    address: z.string().transform((val) => {
+        try { return JSON.parse(val) }
+        catch { throw new Error("Address must be valid JSON") }
+    }).pipe(z.object({
+        line1: z.string(),
+        line2: z.string().optional(),
+    })),
+    available: z.coerce.boolean(),
+    about: z.string().min(1, "About is required"),
+})

@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: false },  // never return in queries
-    image: { type: String, default: "https://res.cloudinary.com/dpi8rto1s/image/upload/v1777527253/default_image_gq15dp.jpg" }, // URL not base64
+    image: { type: String, default: "" }, // URL not base64
     address: {
         line1: { type: String, default: "" },
         line2: { type: String, default: "" },

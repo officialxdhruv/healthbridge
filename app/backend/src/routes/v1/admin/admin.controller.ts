@@ -5,9 +5,9 @@ import { Appointment } from "@/models/appointmentModel";
 import { User } from "@/models/userModel";
 import { env } from "@/env";
 import { genSalt, hash } from "bcrypt-ts";
-import { ValidationError } from "@/errors";
+import { EntityNotFoundError, ValidationError } from "@/errors";
 import { Request, Response } from "express";
-import { addDoctorSchema } from "@/types/doctor.types";
+import { addDoctorSchema, appointmentIdSchema } from "@/types/doctor.types";
 import { loginSchema } from "@/types/admin.types";
 
 
@@ -30,7 +30,7 @@ export function loginAdmin(req: Request, res: Response) {
         { expiresIn: "7d" }
     );
 
-    res.cookie("token", token, {
+    res.cookie("admin-token", token, {
         httpOnly: true,  // JS can't access it — XSS safe
         secure: env.NODE_ENV === "production", // HTTPS only in production
         sameSite: "strict", // CSRF protection
@@ -84,52 +84,53 @@ export async function addDoctor(req: Request, res: Response) {
 };
 
 export async function appointmentCancel(req: Request, res: Response) {
+    const result = appointmentIdSchema.safeParse(req.body)
+    if (!result.success) throw new ValidationError(result.error.issues[0]?.message ?? "Validation failed")
 
-    const { appointmentId } = req.body
-    const appointmentData = await Appointment.findById(appointmentId)
+    const appointment = await Appointment.findById(result.data.appointmentId)
+    if (!appointment) throw new EntityNotFoundError("Appointment not found")
+    if (appointment.cancelled) throw new ValidationError("Appointment already cancelled")
 
+    await Appointment.findByIdAndUpdate(result.data.appointmentId, { cancelled: true })
 
-    await Appointment.findByIdAndUpdate(appointmentId, { cancelled: true })
+    // release doctor slot
+    const doctor = await Doctor.findById(appointment.docId)
+    if (doctor) {
+        const slotsBooked = doctor.slotsBooked
+        slotsBooked.set(
+            appointment.slotDate,
+            (slotsBooked.get(appointment.slotDate) ?? []).filter(s => s !== appointment.slotTime)
+        )
+        await Doctor.findByIdAndUpdate(appointment.docId, { slotsBooked })
+    }
 
-    // releasing doctor slot 
-    const { docId, slotDate, slotTime } = appointmentData
-
-    const doctorData = await Doctor.findById(docId)
-
-    let slots_booked = doctorData.slots_booked
-
-    slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
-
-    await Doctor.findByIdAndUpdate(docId, { slots_booked })
-
-    res.json({ success: true, message: 'Appointment Cancelled' })
-
+    res.json({ success: true, message: "Appointment cancelled successfully" })
 }
 
-export async function allDoctors(req: Request, res: Response) {
-    const doctors = await Doctor.find({}).select('-password')
+export async function allDoctors(_req: Request, res: Response) {
+    const doctors = await Doctor.find({}).select("-password")
     res.json({ success: true, doctors })
 }
 
-// API to get all appointments list
-export async function appointmentsAdmin(req: Request, res: Response) {
+export async function appointmentsAdmin(_req: Request, res: Response) {
     const appointments = await Appointment.find({})
     res.json({ success: true, appointments })
 }
 
-// API to get dashboard data for admin panel
-export async function adminDashboard(req: Request, res: Response) {
-    const doctors = await Doctor.find({})
-    const users = await User.find({})
-    const appointments = await Appointment.find({})
+export async function adminDashboard(_req: Request, res: Response) {
+    const [doctors, users, appointments] = await Promise.all([
+        Doctor.find({}).select("_id"),   // only fetch what you need
+        User.find({}).select("_id"),
+        Appointment.find({})
+    ])
 
-    const dashData = {
-        doctors: doctors.length,
-        appointments: appointments.length,
-        patients: users.length,
-        latestAppointments: appointments.reverse().slice(0, 5)
-    }
-
-    res.json({ success: true, dashData })
+    res.json({
+        success: true,
+        dashData: {
+            doctors: doctors.length,
+            appointments: appointments.length,
+            patients: users.length,
+            latestAppointments: [...appointments].reverse().slice(0, 5)
+        }
+    })
 }
-

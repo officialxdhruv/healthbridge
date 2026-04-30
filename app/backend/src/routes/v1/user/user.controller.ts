@@ -7,7 +7,7 @@ import { Request, Response } from "express";
 import { Doctor } from '@/models/doctorModel';
 import { Appointment } from '@/models/appointmentModel';
 import { compare, genSalt, hash } from 'bcrypt-ts';
-import { loginSchema, registerSchema } from '@/types/user.types';
+import { loginSchema, registerSchema, updateProfileSchema } from '@/types/user.types';
 import { EntityNotFoundError, UnauthorizedError, ValidationError } from '@/errors';
 
 
@@ -38,7 +38,7 @@ export async function registerUser(req: Request, res: Response) {
         { expiresIn: "7d" }
     );
 
-    res.cookie("token", token, {
+    res.cookie("user-token", token, {
         httpOnly: true,  // JS can't access it — XSS safe
         secure: env.NODE_ENV === "production", // HTTPS only in production
         sameSite: "strict", // CSRF protection
@@ -75,7 +75,7 @@ export async function loginUser(req: Request, res: Response) {
         { expiresIn: "7d" }
     );
 
-    res.cookie("token", token, {
+    res.cookie("user-token", token, {
         httpOnly: true,  // JS can't access it — XSS safe
         secure: env.NODE_ENV === "production", // HTTPS only in production
         sameSite: "strict", // CSRF protection
@@ -86,9 +86,7 @@ export async function loginUser(req: Request, res: Response) {
 }
 
 export async function getProfile(req: Request, res: Response) {
-    const { userId } = req.body;
-
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user!.id);
 
     if (!user) {
         throw new EntityNotFoundError("User not found");
@@ -97,39 +95,25 @@ export async function getProfile(req: Request, res: Response) {
     res.json({ success: true, user });
 }
 
-
-// API to update user profile
 export async function updateProfile(req: Request, res: Response) {
+    const result = updateProfileSchema.safeParse(req.body)
 
-    try {
-
-        const { userId, name, phone, address, dob, gender } = req.body
-        const imageFile = req.file
-
-        if (!name || !phone || !dob || !gender) {
-            return res.json({ success: false, message: "Data Missing" })
-        }
-
-        await User.findByIdAndUpdate(userId, { name, phone, address: JSON.parse(address), dob, gender })
-
-        if (imageFile) {
-
-            // upload image to cloudinary
-            const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" })
-            const imageURL = imageUpload.secure_url
-
-            await User.findByIdAndUpdate(userId, { image: imageURL })
-        }
-
-        res.json({ success: true, message: 'Profile Updated' })
-
-    } catch (error: any) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+    if (!result.success) {
+        throw new ValidationError(result.error.issues[0]?.message ?? "Validation failed")
     }
+
+    const { name, phone, address, dob, gender } = result.data
+
+    await User.findByIdAndUpdate(req.user!.id, { name, phone, address, dob, gender })
+
+    if (req.file) {
+        const imageUpload = await cloudinary.uploader.upload(req.file.path, { resource_type: "image" })
+        await User.findByIdAndUpdate(req.user!.id, { image: imageUpload.secure_url })
+    }
+
+    res.json({ success: true, message: "Profile updated successfully" })
 }
 
-// API to book appointment 
 export async function bookAppointment(req: Request, res: Response) {
 
     try {
