@@ -24,6 +24,7 @@ export default function errorHandler(
     }
 
     if (env.NODE_ENV === "development") {
+        console.clear();
         console.log(error);
     }
 

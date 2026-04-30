@@ -14,7 +14,6 @@ const doctorRouter = Router();
 
 doctorRouter.post("/cancel-appointment", appointmentCancel)
 doctorRouter.get("/appointments", appointmentsDoctor)
-doctorRouter.get("/list", doctorList)
 doctorRouter.post("/change-availability", changeAvailability)
 doctorRouter.post("/complete-appointment", appointmentComplete)
 doctorRouter.get("/dashboard", doctorDashboard)
