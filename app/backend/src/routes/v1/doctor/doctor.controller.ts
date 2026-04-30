@@ -35,8 +35,16 @@ export async function loginDoctor(req: Request, res: Response) {
     { expiresIn: "7d" }
   );
 
-  res.json({ success: true, token });
+  res.cookie("token", token, {
+    httpOnly: true,  // JS can't access it — XSS safe
+    secure: env.NODE_ENV === "production", // HTTPS only in production
+    sameSite: "strict", // CSRF protection
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  });
+
+  res.json({ success: true });
 }
+
 
 export async function appointmentsDoctor(req: Request, res: Response) {
   const docId = req.user!.id;

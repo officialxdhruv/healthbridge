@@ -4,6 +4,7 @@ import errorHandler from '@/middlewares/error-handler';
 import v1 from '@/routes/v1/routes';
 import { env } from '@/env';
 import EntityNotFoundError from '@/errors/EntityNotFoundError';
+import cookieParser from 'cookie-parser';
 
 export const createServer = () => {
     const app = express();
@@ -11,6 +12,7 @@ export const createServer = () => {
     app
         .disable('x-powered-by')
         .use(express.json())
+        .use(cookieParser())
         .use(express.urlencoded({ extended: true }))
         .use(
             cors({

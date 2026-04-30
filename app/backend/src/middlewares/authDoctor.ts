@@ -5,13 +5,7 @@ import { ForbiddenError, UnauthorizedError } from '@/errors';
 
 async function authDoctor(req: Request, res: Response, next: NextFunction) {
 
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new UnauthorizedError("No token provided");
-    }
-
-    const token = authHeader.split(' ')[1];
+    const token = req.cookies?.token;
 
     if (!token) {
         throw new UnauthorizedError("No token provided");
@@ -24,7 +18,7 @@ async function authDoctor(req: Request, res: Response, next: NextFunction) {
     }
 
     req.user = { id: decoded.id, role: decoded.role };
-    
+
     next();
 };
 

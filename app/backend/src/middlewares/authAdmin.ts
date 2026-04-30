@@ -4,13 +4,7 @@ import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 async function authAdmin(req: Request, res: Response, next: NextFunction) {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        throw new UnauthorizedError("No token provided");
-    }
-
-    const token = authHeader.split(" ")[1];
+    const token = req.cookies?.token;
 
     if (!token) {
         throw new UnauthorizedError("No token provided");
@@ -21,6 +15,8 @@ async function authAdmin(req: Request, res: Response, next: NextFunction) {
     if (decoded.role !== "admin" || decoded.email !== env.ADMIN_EMAIL) {
         throw new ForbiddenError("Not authorized");
     }
+
+    req.admin = { email: decoded.email, role: decoded.role };
 
     next();
 }
