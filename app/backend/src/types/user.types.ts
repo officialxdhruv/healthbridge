@@ -28,4 +28,8 @@ export const updateProfileSchema = z.object({
     gender: z.enum(["Male", "Female", "Other"]),
 })
 
-export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export const bookAppointmentSchema = z.object({
+    docId: z.string().min(1, "Doctor ID is required"),
+    slotDate: z.string().min(1, "Slot date is required"),
+    slotTime: z.string().min(1, "Slot time is required"),
+})

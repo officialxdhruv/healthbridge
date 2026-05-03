@@ -7,8 +7,9 @@ import { Request, Response } from "express";
 import { Doctor } from '@/models/doctorModel';
 import { Appointment } from '@/models/appointmentModel';
 import { compare, genSalt, hash } from 'bcrypt-ts';
-import { loginSchema, registerSchema, updateProfileSchema } from '@/types/user.types';
-import { EntityNotFoundError, UnauthorizedError, ValidationError } from '@/errors';
+import { bookAppointmentSchema, loginSchema, registerSchema, updateProfileSchema } from '@/types/user.types';
+import { EntityNotFoundError, ForbiddenError, UnauthorizedError, ValidationError } from '@/errors';
+import { appointmentIdSchema } from "@/types/doctor.types";
 
 
 export async function registerUser(req: Request, res: Response) {
@@ -115,107 +116,74 @@ export async function updateProfile(req: Request, res: Response) {
 }
 
 export async function bookAppointment(req: Request, res: Response) {
+    const result = bookAppointmentSchema.safeParse(req.body)
+    if (!result.success) throw new ValidationError(result.error.issues[0]?.message ?? "Validation failed")
 
-    try {
+    const { docId, slotDate, slotTime } = result.data
+    const userId = req.user!.id
 
-        const { userId, docId, slotDate, slotTime } = req.body
-        const docData = await Doctor.findById(docId).select("-password")
+    const [doctor, user] = await Promise.all([
+        Doctor.findById(docId),
+        User.findById(userId)
+    ])
 
-        if (docData && !docData.available) {
-            return res.json({ success: false, message: 'Doctor Not Available' })
-        }
+    if (!doctor) throw new EntityNotFoundError("Doctor not found")
+    if (!user) throw new EntityNotFoundError("User not found")
+    if (!doctor.available) throw new ValidationError("Doctor not available")
 
-        let slots_booked = docData.slots_booked
+    const slotsBooked = doctor.slotsBooked
+    const slotList = slotsBooked.get(slotDate) ?? []
 
-        // checking for slot availablity 
-        if (slots_booked[slotDate]) {
-            if (slots_booked[slotDate].includes(slotTime)) {
-                return res.json({ success: false, message: 'Slot Not Available' })
-            }
-            else {
-                slots_booked[slotDate].push(slotTime)
-            }
-        } else {
-            slots_booked[slotDate] = []
-            slots_booked[slotDate].push(slotTime)
-        }
-
-        const userData = await User.findById(userId).select("-password")
-
-        delete docData.slots_booked
-
-        const appointmentData = {
-            userId,
-            docId,
-            userData,
-            docData,
-            amount: docData.fees,
-            slotTime,
-            slotDate,
-            date: Date.now()
-        }
-
-        const newAppointment = new Appointment(appointmentData)
-        await newAppointment.save()
-
-        // save new slots data in docData
-        await Doctor.findByIdAndUpdate(docId, { slots_booked })
-
-        res.json({ success: true, message: 'Appointment Booked' })
-
-    } catch (error: any) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+    if (slotList.includes(slotTime)) {
+        throw new ValidationError("Slot not available")
     }
 
+    slotsBooked.set(slotDate, [...slotList, slotTime])
+    await Doctor.findByIdAndUpdate(docId, { slotsBooked })
+
+    const { slotsBooked: _, ...docData } = doctor.toObject()
+
+    const newAppointment = new Appointment({
+        userId,
+        docId,
+        userData: user.toObject(),
+        docData,
+        amount: doctor.fees,
+        slotTime,
+        slotDate,
+    })
+
+    await newAppointment.save()
+    res.status(201).json({ success: true, message: "Appointment booked successfully" })
 }
 
-// API to cancel appointment
 export async function cancelAppointment(req: Request, res: Response) {
-    try {
+    const result = appointmentIdSchema.safeParse(req.body)
+    if (!result.success) throw new ValidationError(result.error.issues[0]?.message ?? "Validation failed")
 
-        const { userId, appointmentId } = req.body
-        const appointmentData = await Appointment.findById(appointmentId)
+    const appointment = await Appointment.findById(result.data.appointmentId)
+    if (!appointment) throw new EntityNotFoundError("Appointment not found")
+    if (appointment.userId.toString() !== req.user!.id) throw new ForbiddenError("Not authorized")
+    if (appointment.cancelled) throw new ValidationError("Appointment already cancelled")
 
-        // verify appointment user 
-        if (appointmentData.userId !== userId) {
-            return res.json({ success: false, message: 'Unauthorized action' })
-        }
+    await Appointment.findByIdAndUpdate(result.data.appointmentId, { cancelled: true })
 
-        await Appointment.findByIdAndUpdate(appointmentId, { cancelled: true })
-
-        // releasing doctor slot 
-        const { docId, slotDate, slotTime } = appointmentData
-
-        const doctorData = await Doctor.findById(docId)
-
-        let slots_booked = doctorData.slots_booked
-
-        slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
-
-        await Doctor.findByIdAndUpdate(docId, { slots_booked })
-
-        res.json({ success: true, message: 'Appointment Cancelled' })
-
-    } catch (error: any) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+    const doctor = await Doctor.findById(appointment.docId)
+    if (doctor) {
+        const slotsBooked = doctor.slotsBooked
+        slotsBooked.set(
+            appointment.slotDate,
+            (slotsBooked.get(appointment.slotDate) ?? []).filter(s => s !== appointment.slotTime)
+        )
+        await Doctor.findByIdAndUpdate(appointment.docId, { slotsBooked })
     }
+
+    res.json({ success: true, message: "Appointment cancelled successfully" })
 }
 
-// API to get user appointments for frontend my-appointments page
 export async function listAppointment(req: Request, res: Response) {
-    try {
-
-        const { userId } = req.body
-        const appointments = await Appointment.find({ userId })
-
-        res.json({ success: true, appointments })
-
-    } catch (error: any) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
-    }
+    const appointments = await Appointment.find({ userId: req.user!.id })
+    res.json({ success: true, appointments })
 }
 
 // const razorpayInstance = new razorpay({
