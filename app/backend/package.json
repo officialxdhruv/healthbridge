@@ -7,9 +7,6 @@
     "build": "bun build src/index.ts --outdir dist",
     "start": "bun dist/index.js"
   },
-  "exports": {
-    "./models/*": "./src/models/*"
-  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.10",
@@ -24,6 +21,7 @@
     "typescript": "^5.x"
   },
   "dependencies": {
+    "@healthbridge/types": "workspace:*",
     "@t3-oss/env-core": "^0.13.11",
     "bcrypt-ts": "^8.0.1",
     "cloudinary": "^2.10.0",
