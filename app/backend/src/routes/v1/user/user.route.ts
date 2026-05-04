@@ -1,12 +1,12 @@
-import upload from "@/middlewares/multer";
 import { Router } from "express";
+import upload from "@/middlewares/multer";
 import {
-  getProfile,
-  updateProfile,
   bookAppointment,
-  listAppointment,
   cancelAppointment,
+  getProfile,
+  listAppointment,
   payAppointment,
+  updateProfile,
 } from "./user.controller";
 
 const userRouter = Router();

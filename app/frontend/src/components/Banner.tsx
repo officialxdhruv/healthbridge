@@ -1,6 +1,6 @@
+import { useNavigate } from "react-router";
 import { assets } from "@/assets/assets_frontend/assets";
 import { Button } from "./ui/button";
-import { useNavigate } from "react-router";
 
 export default function Banner() {
   const navigate = useNavigate();

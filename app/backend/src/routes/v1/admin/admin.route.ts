@@ -1,4 +1,5 @@
 import { Router } from "express";
+import upload from "@/middlewares/multer";
 import {
   addDoctor,
   adminDashboard,
@@ -6,7 +7,6 @@ import {
   appointmentCancel,
   appointmentsAdmin,
 } from "@/routes/v1/admin/admin.controller";
-import upload from "@/middlewares/multer";
 import { changeAvailability } from "@/routes/v1/doctor/doctor.controller";
 
 const adminRouter = Router();

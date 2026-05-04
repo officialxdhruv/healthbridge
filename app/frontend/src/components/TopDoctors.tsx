@@ -1,8 +1,8 @@
-import { Card, CardContent } from "./ui/card";
-import { Button } from "./ui/button";
-import { useNavigate } from "react-router";
 import { useContext } from "react";
+import { useNavigate } from "react-router";
 import { AppContext } from "@/context/AppContext";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
 
 export default function TopDoctors() {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ export default function TopDoctors() {
             className="cursor-pointer hover:-translate-y-2.5 transition-all duration-500"
             key={index}
           >
-            <img className="bg-accent" src={item.image} />
+            <img className="bg-accent" src={item.image} alt={item.name} />
             <CardContent>
               <div className="flex items-center gap-2 text-sm text-center text-green-500 ">
                 <p className="size-2 bg-green-500 rounded-full"></p>{" "}

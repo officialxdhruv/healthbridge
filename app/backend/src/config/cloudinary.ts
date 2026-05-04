@@ -1,5 +1,5 @@
-import { env } from "@/env";
 import { v2 as cloudinary } from "cloudinary";
+import { env } from "@/env";
 
 export default function connectCloudinary() {
   cloudinary.config({

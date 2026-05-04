@@ -1,5 +1,5 @@
-import { assets } from "@/assets/assets_frontend/assets";
 import { MoveRight } from "lucide-react";
+import { assets } from "@/assets/assets_frontend/assets";
 import { Button } from "./ui/button";
 
 export default function Header() {

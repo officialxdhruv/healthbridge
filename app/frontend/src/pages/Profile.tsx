@@ -1,3 +1,6 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { assets } from "@/assets/assets_frontend/assets";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,9 +13,6 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/lib/api";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 export type UserProfile = {
   _id: string;

@@ -1,14 +1,14 @@
-import jwt from "jsonwebtoken";
-import { v2 as cloudinary } from "cloudinary";
-import { Doctor } from "@/models/doctorModel";
-import { Appointment } from "@/models/appointmentModel";
-import { User } from "@/models/userModel";
-import { env } from "@/env";
 import { genSalt, hash } from "bcrypt-ts";
+import { v2 as cloudinary } from "cloudinary";
+import type { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import { env } from "@/env";
 import { EntityNotFoundError, ValidationError } from "@/errors";
-import { Request, Response } from "express";
-import { addDoctorSchema, appointmentIdSchema } from "@/types/doctor.types";
+import { Appointment } from "@/models/appointmentModel";
+import { Doctor } from "@/models/doctorModel";
+import { User } from "@/models/userModel";
 import { loginSchema } from "@/types/admin.types";
+import { addDoctorSchema, appointmentIdSchema } from "@/types/doctor.types";
 
 export function loginAdmin(req: Request, res: Response) {
   const result = loginSchema.safeParse(req.body);

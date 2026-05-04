@@ -1,8 +1,7 @@
-import { Doctor } from "@/models/doctorModel";
 import { compare } from "bcrypt-ts";
+import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { Request, Response } from "express";
-import { Appointment } from "@/models/appointmentModel";
+import z from "zod";
 import { env } from "@/env";
 import {
   EntityNotFoundError,
@@ -10,12 +9,13 @@ import {
   UnauthorizedError,
   ValidationError,
 } from "@/errors";
+import { Appointment } from "@/models/appointmentModel";
+import { Doctor } from "@/models/doctorModel";
 import {
   appointmentIdSchema,
   loginDoctorSchema,
   updateDoctorSchema,
 } from "@/types/doctor.types";
-import z from "zod";
 
 export async function loginDoctor(req: Request, res: Response) {
   const result = loginDoctorSchema.safeParse(req.body);
@@ -55,7 +55,7 @@ export async function loginDoctor(req: Request, res: Response) {
 }
 
 export async function appointmentsDoctor(req: Request, res: Response) {
-  const docId = req.user!.id;
+  const docId = req.user?.id;
 
   const appointments = await Appointment.find({ docId });
 
@@ -67,7 +67,7 @@ export async function appointmentsDoctor(req: Request, res: Response) {
 }
 
 export async function appointmentCancel(req: Request, res: Response) {
-  const docId = req.user!.id;
+  const docId = req.user?.id;
 
   const result = z
     .object({
@@ -109,7 +109,7 @@ export async function appointmentComplete(req: Request, res: Response) {
 
   const appointment = await Appointment.findById(result.data.appointmentId);
   if (!appointment) throw new EntityNotFoundError("Appointment not found");
-  if (appointment.docId.toString() !== req.user!.id)
+  if (appointment.docId.toString() !== req.user?.id)
     throw new ForbiddenError("Not authorized");
 
   await Appointment.findByIdAndUpdate(result.data.appointmentId, {
@@ -124,7 +124,7 @@ export async function doctorList(_req: Request, res: Response) {
 }
 
 export async function changeAvailability(req: Request, res: Response) {
-  const doctor = await Doctor.findById(req.user!.id);
+  const doctor = await Doctor.findById(req.user?.id);
   if (!doctor) throw new EntityNotFoundError("Doctor not found");
 
   doctor.available = !doctor.available;
@@ -134,7 +134,7 @@ export async function changeAvailability(req: Request, res: Response) {
 }
 
 export async function doctorProfile(req: Request, res: Response) {
-  const doctor = await Doctor.findById(req.user!.id).select("-password");
+  const doctor = await Doctor.findById(req.user?.id).select("-password");
   if (!doctor) throw new EntityNotFoundError("Doctor not found");
 
   res.json({ success: true, doctor });
@@ -147,12 +147,12 @@ export async function updateDoctorProfile(req: Request, res: Response) {
       result.error.issues[0]?.message ?? "Validation failed",
     );
 
-  await Doctor.findByIdAndUpdate(req.user!.id, result.data);
+  await Doctor.findByIdAndUpdate(req.user?.id, result.data);
   res.json({ success: true, message: "Profile updated successfully" });
 }
 
 export async function doctorDashboard(req: Request, res: Response) {
-  const appointments = await Appointment.find({ docId: req.user!.id });
+  const appointments = await Appointment.find({ docId: req.user?.id });
 
   let earnings = 0;
   const patientSet = new Set<string>();

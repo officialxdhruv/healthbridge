@@ -1,25 +1,24 @@
-import jwt from "jsonwebtoken";
-import { v2 as cloudinary } from "cloudinary";
-// import razorpay from 'razorpay';
-import { User } from "@/models/userModel";
-import { env } from "@/env";
-import { Request, Response } from "express";
-import { Doctor } from "@/models/doctorModel";
-import { Appointment } from "@/models/appointmentModel";
 import { compare, genSalt, hash } from "bcrypt-ts";
-import {
-  bookAppointmentSchema,
-  loginSchema,
-  registerSchema,
-  updateProfileSchema,
-} from "@/types/user.types";
+import { v2 as cloudinary } from "cloudinary";
+import type { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import { env } from "@/env";
 import {
   EntityNotFoundError,
   ForbiddenError,
   UnauthorizedError,
   ValidationError,
 } from "@/errors";
+import { Appointment } from "@/models/appointmentModel";
+import { Doctor } from "@/models/doctorModel";
+import { User } from "@/models/userModel";
 import { appointmentIdSchema } from "@/types/doctor.types";
+import {
+  bookAppointmentSchema,
+  loginSchema,
+  registerSchema,
+  updateProfileSchema,
+} from "@/types/user.types";
 
 export async function registerUser(req: Request, res: Response) {
   const result = registerSchema.safeParse(req.body);
@@ -96,7 +95,7 @@ export async function loginUser(req: Request, res: Response) {
 }
 
 export async function getProfile(req: Request, res: Response) {
-  const user = await User.findById(req.user!.id);
+  const user = await User.findById(req.user?.id);
 
   if (!user) {
     throw new EntityNotFoundError("User not found");
@@ -116,7 +115,7 @@ export async function updateProfile(req: Request, res: Response) {
 
   const { name, phone, address, dob, gender } = result.data;
 
-  await User.findByIdAndUpdate(req.user!.id, {
+  await User.findByIdAndUpdate(req.user?.id, {
     name,
     phone,
     address,
@@ -128,7 +127,7 @@ export async function updateProfile(req: Request, res: Response) {
     const imageUpload = await cloudinary.uploader.upload(req.file.path, {
       resource_type: "image",
     });
-    await User.findByIdAndUpdate(req.user!.id, {
+    await User.findByIdAndUpdate(req.user?.id, {
       image: imageUpload.secure_url,
     });
   }
@@ -144,7 +143,7 @@ export async function bookAppointment(req: Request, res: Response) {
     );
 
   const { docId, slotDate, slotTime } = result.data;
-  const userId = req.user!.id;
+  const userId = req.user?.id;
 
   const [doctor, user] = await Promise.all([
     Doctor.findById(docId),
@@ -192,7 +191,7 @@ export async function cancelAppointment(req: Request, res: Response) {
 
   const appointment = await Appointment.findById(result.data.appointmentId);
   if (!appointment) throw new EntityNotFoundError("Appointment not found");
-  if (appointment.userId.toString() !== req.user!.id)
+  if (appointment.userId.toString() !== req.user?.id)
     throw new ForbiddenError("Not authorized");
   if (appointment.cancelled)
     throw new ValidationError("Appointment already cancelled");
@@ -217,7 +216,7 @@ export async function cancelAppointment(req: Request, res: Response) {
 }
 
 export async function listAppointment(req: Request, res: Response) {
-  const appointments = await Appointment.find({ userId: req.user!.id });
+  const appointments = await Appointment.find({ userId: req.user?.id });
   res.json({ success: true, appointments });
 }
 
@@ -230,7 +229,7 @@ export async function payAppointment(req: Request, res: Response) {
 
   const appointment = await Appointment.findById(result.data.appointmentId);
   if (!appointment) throw new EntityNotFoundError("Appointment not found");
-  if (appointment.userId.toString() !== req.user!.id)
+  if (appointment.userId.toString() !== req.user?.id)
     throw new ForbiddenError("Not authorized");
   if (appointment.cancelled)
     throw new ValidationError("Appointment is cancelled");

@@ -1,3 +1,7 @@
+import { useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router";
+import { toast } from "sonner";
 import { assets } from "@/assets/assets_frontend/assets";
 import RelatedDoctors from "@/components/RelatedDoctors";
 import { Badge } from "@/components/ui/badge";
@@ -6,10 +10,6 @@ import { useDoctors } from "@/hooks/useDoctors";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/state/useAppStore";
-import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import { toast } from "sonner";
 
 export default function Appointment() {
   const daysOfWeeks = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];

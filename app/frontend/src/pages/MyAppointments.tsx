@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
 import type { Appointment } from "@healthbridge/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 
 const MyAppointments = () => {
   const navigate = useNavigate();
@@ -98,29 +98,29 @@ const MyAppointments = () => {
                 </Button>
               )}
               {!item.cancelled && item.payment && !item.isCompleted && (
-                <button className="sm:min-w-48 py-2 border rounded">
+                <Button className="rounded-none" variant={"outline"}>
                   Paid
-                </button>
+                </Button>
               )}
 
               {item.isCompleted && (
-                <button className="sm:min-w-48 py-2 border border-green-500 rounded text-green-500">
+                <Button className="rounded-none" variant={"outline"}>
                   Completed
-                </button>
+                </Button>
               )}
 
               {!item.cancelled && !item.isCompleted && (
-                <button
+                <Button
                   onClick={() => cancelAppointment(item._id)}
                   className="text-[#696969] sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300"
                 >
                   Cancel appointment
-                </button>
+                </Button>
               )}
               {item.cancelled && !item.isCompleted && (
-                <button className="sm:min-w-48 py-2 border border-red-500 rounded text-red-500">
+                <Button className="sm:min-w-48 py-2 border border-red-500 rounded text-red-500">
                   Appointment cancelled
-                </button>
+                </Button>
               )}
             </div>
           </div>

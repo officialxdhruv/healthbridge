@@ -1,7 +1,7 @@
-import { env } from "@/env";
-import connectDB from "@/config/mongodb";
-import { createServer } from "@/server";
 import connectCloudinary from "@/config/cloudinary";
+import connectDB from "@/config/mongodb";
+import { env } from "@/env";
+import { createServer } from "@/server";
 
 const PORT = env.PORT;
 

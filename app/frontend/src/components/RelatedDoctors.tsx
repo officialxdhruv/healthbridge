@@ -1,9 +1,9 @@
-import { AppContext } from "@/context/AppContext";
 import { useContext } from "react";
-import { Card, CardContent } from "./ui/card";
 import { useNavigate } from "react-router";
-import { Button } from "./ui/button";
 import type { Doctors } from "@/assets/assets_frontend/assets";
+import { AppContext } from "@/context/AppContext";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
 
 export default function RelatedDoctors({
   docId,

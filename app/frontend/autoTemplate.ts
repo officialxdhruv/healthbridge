@@ -1,6 +1,6 @@
+import { readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import chokidar from "chokidar";
-import { readFileSync, writeFileSync } from "fs";
-import path from "path";
 
 console.log("👀 Bun watcher running...");
 

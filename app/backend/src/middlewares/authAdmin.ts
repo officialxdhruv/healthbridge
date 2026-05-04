@@ -1,9 +1,9 @@
-import { ForbiddenError, UnauthorizedError } from "@/errors";
-import { env } from "@/env";
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { env } from "@/env";
+import { ForbiddenError, UnauthorizedError } from "@/errors";
 
-async function authAdmin(req: Request, res: Response, next: NextFunction) {
+async function authAdmin(req: Request, _res: Response, next: NextFunction) {
   const token = req.cookies?.token;
 
   if (!token) {

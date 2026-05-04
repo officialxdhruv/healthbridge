@@ -1,6 +1,6 @@
+import type { NextFunction, Request, Response } from "express";
 import { env } from "@/env";
 import CustomError from "@/errors/CustomError";
-import type { NextFunction, Request, Response } from "express";
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;

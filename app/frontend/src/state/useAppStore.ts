@@ -1,5 +1,5 @@
-import { doctors } from "@/assets/assets_frontend/assets";
 import { create } from "zustand";
+import { doctors } from "@/assets/assets_frontend/assets";
 
 type AppState = {
   currencySymbol: string;

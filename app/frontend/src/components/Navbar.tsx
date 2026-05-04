@@ -1,7 +1,8 @@
 import { CalendarRange } from "lucide-react";
-import { NavLink, useNavigate } from "react-router";
-import { Button } from "./ui/button";
 import { useState } from "react";
+import { NavLink, useNavigate } from "react-router";
+import { assets } from "@/assets/assets_frontend/assets";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { assets } from "@/assets/assets_frontend/assets";
 
 export default function Navbar() {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const [token, setToken] = useState(true);
 
   return (

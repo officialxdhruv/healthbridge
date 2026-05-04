@@ -1,13 +1,13 @@
 import { Router } from "express";
+import authAdmin from "@/middlewares/authAdmin";
+import authDoctor from "@/middlewares/authDoctor";
+import authUser from "@/middlewares/authUser";
 import { loginAdmin } from "./admin/admin.controller";
 import adminRouter from "./admin/admin.route";
 import { doctorList, loginDoctor } from "./doctor/doctor.controller";
 import doctorRouter from "./doctor/doctor.route";
-import { registerUser, loginUser } from "./user/user.controller";
+import { loginUser, registerUser } from "./user/user.controller";
 import userRouter from "./user/user.route";
-import authDoctor from "@/middlewares/authDoctor";
-import authUser from "@/middlewares/authUser";
-import authAdmin from "@/middlewares/authAdmin";
 
 const v1 = Router();
 

@@ -1,7 +1,7 @@
 import { createContext, useState } from "react";
 import {
-  doctors as docData,
   type Doctors,
+  doctors as docData,
 } from "../assets/assets_frontend/assets.ts";
 
 type AppContextType = {

@@ -1,5 +1,5 @@
 import CustomError from "./CustomError";
-import ErrorCode from "./types";
+import type ErrorCode from "./types";
 
 class UnauthorizedError extends CustomError<ErrorCode> {
   constructor(message = "Unauthorized") {

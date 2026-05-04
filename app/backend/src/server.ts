@@ -1,9 +1,9 @@
-import express from "express";
+import cookieParser from "cookie-parser";
 import cors from "cors";
+import express from "express";
+import { env } from "@/env";
 import errorHandler from "@/middlewares/error-handler";
 import v1 from "@/routes/v1/routes";
-import { env } from "@/env";
-import cookieParser from "cookie-parser";
 
 export const createServer = () => {
   const app = express();

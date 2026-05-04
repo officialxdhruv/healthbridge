@@ -1,7 +1,7 @@
 import mongoose, {
-  model,
   type HydratedDocument,
   type InferSchemaType,
+  model,
 } from "mongoose";
 
 const doctorSchema = new mongoose.Schema(

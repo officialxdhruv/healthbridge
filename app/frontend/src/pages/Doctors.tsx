@@ -1,10 +1,10 @@
+import { useMemo } from "react";
+import { useNavigate, useParams } from "react-router";
 import type { Doctors } from "@/assets/assets_frontend/assets";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDoctors } from "@/hooks/useDoctors";
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
-import { useNavigate, useParams } from "react-router";
 
 export default function Doctors() {
   // const { doctors } = useContext(AppContext);

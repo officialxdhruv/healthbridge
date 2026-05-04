@@ -1,11 +1,11 @@
 import { Router } from "express";
 import {
   appointmentCancel,
-  appointmentsDoctor,
-  doctorList,
-  changeAvailability,
   appointmentComplete,
+  appointmentsDoctor,
+  changeAvailability,
   doctorDashboard,
+  doctorList,
   doctorProfile,
   updateDoctorProfile,
 } from "./doctor.controller";

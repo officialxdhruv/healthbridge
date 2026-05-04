@@ -1,14 +1,14 @@
 import { Route, Routes } from "react-router";
-import Home from "./pages/Home";
-import Doctors from "./pages/Doctors";
-import Login from "./pages/Login";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Profile from "./pages/Profile";
-import Appointment from "./pages/Appointment";
-import MyAppointments from "./pages/MyAppointments";
-import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Navbar from "./components/Navbar";
+import About from "./pages/About";
+import Appointment from "./pages/Appointment";
+import Contact from "./pages/Contact";
+import Doctors from "./pages/Doctors";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import MyAppointments from "./pages/MyAppointments";
+import Profile from "./pages/Profile";
 
 export function App() {
   return (

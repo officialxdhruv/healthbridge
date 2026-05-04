@@ -1,6 +1,6 @@
-import { api } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
 import type { Doctor } from "@healthbridge/types";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 export function useDoctors() {
   return useQuery({
