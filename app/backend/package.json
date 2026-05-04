@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "bun --watch --env-file=.env src/index.ts",
     "build": "bun build src/index.ts --outdir dist",
-    "start": "bun dist/index.js"
+    "start": "bun dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "format": "biome format --write ."
   },
   "devDependencies": {
     "@types/bun": "latest",

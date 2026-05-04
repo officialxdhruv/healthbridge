@@ -9,10 +9,15 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo dev --ui tui",
-    "check:web": "turbo typecheck --filter=@healthbridge/frontend"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "format": "biome format --write .",
+    "check": "biome check --write ."
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.14",
     "@types/bun": "latest",
     "turbo": "^2.9.6"
   },
