@@ -1,9 +1,9 @@
-import { env } from '@/env'
-import connectDB from '@/config/mongodb'
-import { createServer } from '@/server'
-import connectCloudinary from '@/config/cloudinary'
+import { env } from "@/env";
+import connectDB from "@/config/mongodb";
+import { createServer } from "@/server";
+import connectCloudinary from "@/config/cloudinary";
 
-const PORT = env.PORT
+const PORT = env.PORT;
 
 const bootstrap = async () => {
   await connectDB();
@@ -17,6 +17,6 @@ const bootstrap = async () => {
 };
 
 bootstrap().catch((err) => {
-  console.error('Failed to start server : ', err);
+  console.error("Failed to start server : ", err);
   process.exit(1);
 });

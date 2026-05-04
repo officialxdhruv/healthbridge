@@ -4,7 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ESNext"],
-    "types": ["bun-types"],          // Bun globals (Bun.serve, etc.)
+    "types": ["bun-types"], // Bun globals (Bun.serve, etc.)
     "paths": {
       "@/*": ["./src/*"]
     },

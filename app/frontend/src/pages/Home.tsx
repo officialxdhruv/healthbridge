@@ -4,12 +4,12 @@ import SpecialityMenu from "@/components/SpecialityMenu";
 import TopDoctors from "@/components/TopDoctors";
 
 export default function Home() {
-    return (
-        <div>
-            <Header />
-            <SpecialityMenu />
-            <TopDoctors />
-            <Banner />
-        </div>
-    );
+  return (
+    <div>
+      <Header />
+      <SpecialityMenu />
+      <TopDoctors />
+      <Banner />
+    </div>
+  );
 }
