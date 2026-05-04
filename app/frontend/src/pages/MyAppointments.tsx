@@ -26,7 +26,7 @@ const MyAppointments = () => {
   ];
 
   const slotDateFormat = (slotDate: string) => {
-    const [day, month, year] = slotDate.split("_");
+    const [day, month, year] = slotDate.split("-");
     return `${day} ${months[Number(month)]} ${year}`;
   };
 
@@ -79,7 +79,7 @@ const MyAppointments = () => {
             <div className="flex-1 text-sm">
               <p className="text-base font-semibold">{item.docData.name}</p>
               <p>{item.docData.speciality}</p>
-              <p className="font-medium mt-1">Address:</p>
+              {/* <p className="font-medium mt-1">Address:</p> */}
               {/* <p className=''>{item.docData.address.line1}</p> */}
               {/* <p className=''>{item.docData.address.line2}</p> */}
               <p className="mt-1">
@@ -91,20 +91,20 @@ const MyAppointments = () => {
               {!item.cancelled && !item.payment && !item.isCompleted && (
                 <Button
                   onClick={() => payAppointment(item._id)}
-                  className="rounded-none"
+                  className="rounded-sm w-48"
                   variant={"outline"}
                 >
                   Pay Online
                 </Button>
               )}
               {!item.cancelled && item.payment && !item.isCompleted && (
-                <Button className="rounded-none" variant={"outline"}>
+                <Button className="rounded-sm w-48 bg-green-500" variant={"default"}>
                   Paid
                 </Button>
               )}
 
               {item.isCompleted && (
-                <Button className="rounded-none" variant={"outline"}>
+                <Button className="rounded-sm w-48" variant={"outline"}>
                   Completed
                 </Button>
               )}
@@ -112,13 +112,14 @@ const MyAppointments = () => {
               {!item.cancelled && !item.isCompleted && (
                 <Button
                   onClick={() => cancelAppointment(item._id)}
-                  className="text-[#696969] sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300"
+                  className="rounded-sm w-48"
+                  variant={"destructive"}
                 >
                   Cancel appointment
                 </Button>
               )}
               {item.cancelled && !item.isCompleted && (
-                <Button className="sm:min-w-48 py-2 border border-red-500 rounded text-red-500">
+                <Button className="rounded-sm w-48 border-destructive" variant={"destructive"}>
                   Appointment cancelled
                 </Button>
               )}

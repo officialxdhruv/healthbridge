@@ -9,7 +9,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "turbo dev --ui tui",
     "build": "turbo build",
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
