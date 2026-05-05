@@ -3,6 +3,7 @@ export type AppointmentUserData = {
   email: string;
   phone?: string;
   image?: string;
+  dob?: string;
 };
 
 export type AppointmentDocData = {

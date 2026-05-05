@@ -4,7 +4,7 @@ import { env } from "@/env";
 import { ForbiddenError, UnauthorizedError } from "@/errors";
 
 async function authUser(req: Request, _res: Response, next: NextFunction) {
-  const token = req.cookies?.token;
+  const token = req.cookies?.["user-token"]
 
   if (!token) {
     throw new UnauthorizedError("No token provided");

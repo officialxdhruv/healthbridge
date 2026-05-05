@@ -22,6 +22,9 @@
   },
   "editor.codeActionsOnSave": {
     "source.organizeImports.biome": "explicit"
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
   }
   // "editor.tabSize": 2,
   // "editor.detectIndentation": false,

@@ -23,6 +23,7 @@ const appointmentSchema = new mongoose.Schema(
       email: { type: String, required: true },
       phone: { type: String },
       image: { type: String },
+      dob: { type: Date },
     },
     docData: {
       name: { type: String, required: true },

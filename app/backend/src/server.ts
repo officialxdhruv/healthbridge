@@ -15,7 +15,7 @@ export const createServer = () => {
     .use(express.urlencoded({ extended: true }))
     .use(
       cors({
-        origin: env.FRONTEND_URL,
+        origin: [env.FRONTEND_URL, env.ADMIN_URL],
         credentials: true,
       }),
     );

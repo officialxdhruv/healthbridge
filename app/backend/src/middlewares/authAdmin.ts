@@ -4,7 +4,7 @@ import { env } from "@/env";
 import { ForbiddenError, UnauthorizedError } from "@/errors";
 
 async function authAdmin(req: Request, _res: Response, next: NextFunction) {
-  const token = req.cookies?.token;
+  const token = req.cookies?.["admin-token"];
 
   if (!token) {
     throw new UnauthorizedError("No token provided");

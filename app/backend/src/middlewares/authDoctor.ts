@@ -4,7 +4,7 @@ import { env } from "@/env.js";
 import { ForbiddenError, UnauthorizedError } from "@/errors";
 
 async function authDoctor(req: Request, _res: Response, next: NextFunction) {
-  const token = req.cookies?.token;
+  const token = req.cookies?.["doctor-token"]
 
   if (!token) {
     throw new UnauthorizedError("No token provided");
