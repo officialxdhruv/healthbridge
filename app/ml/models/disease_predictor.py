@@ -1,5 +1,6 @@
 import xgboost as xgb
 import pandas as pd
+import numpy as np
 
 """
 DiseaseModel
@@ -155,14 +156,9 @@ class DiseaseModel:
         return y.cat.categories
 
     def prepare_symptoms_array(self, selected_symptoms):
-        """
-        Convert selected symptoms into model input vector
-        """
-
         symptom_vector = []
 
         for symptom in self.all_symptoms:
-
             symptom_vector.append(1 if symptom in selected_symptoms else 0)
 
-        return [symptom_vector]
+        return np.array([symptom_vector])
