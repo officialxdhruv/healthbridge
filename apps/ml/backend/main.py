@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from pydantic import BaseModel
 from models.disease_predictor import DiseaseModel
+from models.helper import prepare_symptoms_array
 
 app = FastAPI()
 
@@ -39,7 +40,7 @@ def get_symptoms():
 @app.post("/predict")
 def predict(data: PredictRequest):
 
-    X = disease_model.prepare_symptoms_array(data.symptoms)
+    X = prepare_symptoms_array(data.symptoms)
 
     prediction, probability = disease_model.predict(X)
 
@@ -48,7 +49,6 @@ def predict(data: PredictRequest):
     print("Probability:", probability)
 
     if probability is None or math.isnan(float(probability)):
-
         probability = 0.0
 
     return {

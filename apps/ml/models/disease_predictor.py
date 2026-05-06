@@ -1,6 +1,5 @@
 import xgboost as xgb
 import pandas as pd
-import numpy as np
 
 """
 DiseaseModel
@@ -154,11 +153,3 @@ class DiseaseModel:
         # Convert labels to categorical and return unique classes
         y = y.astype("category")
         return y.cat.categories
-
-    def prepare_symptoms_array(self, selected_symptoms):
-        symptom_vector = []
-
-        for symptom in self.all_symptoms:
-            symptom_vector.append(1 if symptom in selected_symptoms else 0)
-
-        return np.array([symptom_vector])
