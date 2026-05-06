@@ -19,9 +19,9 @@ function App() {
     return (
       <React.Fragment>
         <Navbar />
-        <div className="flex h-full items-start">
+        <div className="flex h-full items-start overflow-hidden">
           <Sidebar />
-          <div className="w-full h-full p-4">
+          <div className="w-full h-full p-4 overflow-y-auto">
             <Routes>
               <Route path="/admin-dashboard" element={<Dashboard />} />
               <Route path="/all-appointments" element={<AllAppointments />} />

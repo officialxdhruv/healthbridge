@@ -8,6 +8,7 @@ import Doctors from "./pages/Doctors";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import MyAppointments from "./pages/MyAppointments";
+import PredictPage from "./pages/Predict";
 import Profile from "./pages/Profile";
 
 export function App() {
@@ -25,6 +26,7 @@ export function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/my-appointments" element={<MyAppointments />} />
           <Route path="/appointment/:docId" element={<Appointment />} />
+          <Route path="/predict" element={<PredictPage />} />
         </Routes>
         <Footer />
       </main>
