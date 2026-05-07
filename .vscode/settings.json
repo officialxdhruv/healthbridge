@@ -25,7 +25,8 @@
   },
   "files.associations": {
     "*.css": "tailwindcss"
-  }
+  },
+  "python.defaultInterpreterPath": "apps/ml/.venv/bin/python"
   // "editor.tabSize": 2,
   // "editor.detectIndentation": false,
   // "editor.insertSpaces": false

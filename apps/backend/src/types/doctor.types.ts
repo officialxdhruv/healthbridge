@@ -28,22 +28,11 @@ export const appointmentIdSchema = z.object({
 });
 
 export const updateDoctorSchema = z.object({
-  fees: z.coerce.number().min(0, "Fees must be a positive number"),
-  address: z
-    .string()
-    .transform((val) => {
-      try {
-        return JSON.parse(val);
-      } catch {
-        throw new Error("Address must be valid JSON");
-      }
-    })
-    .pipe(
-      z.object({
+    fees: z.coerce.number().min(0, "Fees must be a positive number"),
+    address: z.object({
         line1: z.string(),
         line2: z.string().optional(),
-      }),
-    ),
-  available: z.coerce.boolean(),
-  about: z.string().min(1, "About is required"),
-});
+    }),
+    available: z.boolean(),
+    about: z.string().min(1, "About is required"),
+})

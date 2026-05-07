@@ -1,14 +1,11 @@
 import { useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
-import type { Doctors } from "@/assets/assets_frontend/assets";
-import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDoctors } from "@/hooks/useDoctors";
 import { cn } from "@/lib/utils";
 
 export default function Doctors() {
-  // const { doctors } = useContext(AppContext);
-
   const navigate = useNavigate();
   const { speciality } = useParams();
   const { data: doctors, isLoading } = useDoctors();
@@ -37,51 +34,53 @@ export default function Doctors() {
         Browse through the doctors specialist
       </p>
       <div className="flex flex-col sm:flex-row items-start gap-5 mt-5">
-        <div className="flex flex-col gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-4 text-sm">
           {specialities.map((s) => (
-            <p
+            <Button
               key={s}
               onClick={() =>
                 speciality === s
                   ? navigate("/doctors")
                   : navigate(`/doctors/${s}`)
               }
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "rounded pr-16 pl-3 justify-start cursor-pointer",
-                speciality === s && "bg-accent font-bold text-black",
-              )}
+              className={cn("pr-16 pl-3 justify-start cursor-pointer")}
+              variant={speciality === s ? "default" : "outline"}
             >
               {s}
-            </p>
+            </Button>
           ))}
         </div>
 
         <div className="w-full grid grid-cols-5 gap-4 gap-y-6">
-          {filterDoc.map((item, index) => (
+          {filterDoc.map((doctor) => (
             <Card
-              onClick={() => navigate(`/appointment/${item._id}`)}
-              className="cursor-pointer hover:-translate-y-2.5 transition-all duration-500"
-              key={index}
+              className="cursor-pointer hover:-translate-y-2.5 transition-all duration-500 overflow-hidden pt-0"
+              key={doctor._id}
+              onClick={() => navigate(`/appointment/${doctor._id}`)}
             >
-              <img className="bg-accent" src={item.image} />
-              <CardContent>
-                <div className="flex items-center gap-2 text-sm text-center">
-                  {item.available ? (
-                    <>
-                      <p className="size-2 bg-green-500 rounded-full"></p>
-                      <p className="text-green-500">Available</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="size-2 bg-red-500 rounded-full"></p>
-                      <p className="text-red-500">Not Available</p>
-                    </>
-                  )}
+              <div className="w-full h-48 overflow-hidden">
+                <img
+                  className="w-full h-full object-cover bg-primary dark:bg-primary-foreground"
+                  src={doctor.image}
+                  alt={doctor.name}
+                />
+              </div>
+              <CardContent className="pt-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <p
+                    className={`size-2 rounded-full ${doctor.available ? "bg-green-500" : "bg-red-500"}`}
+                  />
+                  <p
+                    className={
+                      doctor.available ? "text-green-500" : "text-red-500"
+                    }
+                  >
+                    {doctor.available ? "Available" : "Not Available"}
+                  </p>
                 </div>
-                <p className="text-lg font-medium">{item.name}</p>
+                <p className="text-lg font-medium">{doctor.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {item.speciality}
+                  {doctor.speciality}
                 </p>
               </CardContent>
             </Card>

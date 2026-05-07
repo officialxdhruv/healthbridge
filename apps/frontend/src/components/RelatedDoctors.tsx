@@ -38,7 +38,7 @@ export default function RelatedDoctors({
             className="cursor-pointer hover:-translate-y-2.5 transition-all duration-500"
             key={index}
           >
-            <img className="bg-accent" src={item.image} />
+            <img className="bg-accent" src={item.image} alt={item._id} />
             <CardContent>
               <div className="flex items-center gap-2 text-sm text-center text-green-500 ">
                 <p className="size-2 bg-green-500 rounded-full"></p>{" "}

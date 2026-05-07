@@ -5,7 +5,6 @@ import {
   appointmentsDoctor,
   changeAvailability,
   doctorDashboard,
-  doctorList,
   doctorProfile,
   updateDoctorProfile,
 } from "./doctor.controller";
