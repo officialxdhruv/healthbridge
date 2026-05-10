@@ -2,6 +2,7 @@ import { compare, genSalt, hash } from "bcrypt-ts";
 import { v2 as cloudinary } from "cloudinary";
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { razorpay } from "@/config/razorpay";
 import { env } from "@/env";
 import {
   EntityNotFoundError,
@@ -92,6 +93,11 @@ export async function loginUser(req: Request, res: Response) {
   });
 
   res.json({ success: true });
+}
+
+export function logoutUser(_req: Request, res: Response) {
+  res.clearCookie("user-token");
+  res.json({ success: true, message: "Logged out successfully" });
 }
 
 export async function getProfile(req: Request, res: Response) {
@@ -240,5 +246,43 @@ export async function payAppointment(req: Request, res: Response) {
     payment: true,
   });
 
+  res.json({ success: true, message: "Payment successful" });
+}
+
+export async function createRazorpayOrder(req: Request, res: Response) {
+  const result = appointmentIdSchema.safeParse(req.body);
+  if (!result.success)
+    throw new ValidationError(
+      result.error.issues[0]?.message ?? "Validation failed",
+    );
+
+  const appointment = await Appointment.findById(result.data.appointmentId);
+  if (!appointment) throw new EntityNotFoundError("Appointment not found");
+  if (appointment.cancelled)
+    throw new ValidationError("Appointment is cancelled");
+  if (appointment.userId.toString() !== req.user?.id)
+    throw new ForbiddenError("Not authorized");
+
+  const order = await razorpay.orders.create({
+    amount: appointment.amount * 100,
+    currency: "INR",
+    receipt: result.data.appointmentId,
+  });
+
+  res.json({ success: true, order });
+}
+
+export async function verifyRazorpayPayment(req: Request, res: Response) {
+  const { razorpay_order_id } = req.body;
+
+  if (!razorpay_order_id) throw new ValidationError("Order ID is required");
+
+  const orderInfo = await razorpay.orders.fetch(razorpay_order_id);
+
+  if (orderInfo.status !== "paid") {
+    throw new ValidationError("Payment failed");
+  }
+
+  await Appointment.findByIdAndUpdate(orderInfo.receipt, { payment: true });
   res.json({ success: true, message: "Payment successful" });
 }

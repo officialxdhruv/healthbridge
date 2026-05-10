@@ -13,9 +13,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
+import { useAppStore } from "@/state/useAppStore";
 
 export default function DoctorAppointments() {
   const queryClient = useQueryClient();
+
+  const { currencySymbol } = useAppStore();
 
   const { data: appointments = [] } = useQuery({
     queryKey: ["doctor", "appointments"],
@@ -23,7 +26,7 @@ export default function DoctorAppointments() {
       const data = await api
         .get("doctor/appointments")
         .json<{ success: boolean; appointments: Appointment[] }>();
-      return data.appointments;
+      return [...data.appointments].reverse();
     },
   });
 
@@ -93,7 +96,7 @@ export default function DoctorAppointments() {
         <TableBody>
           {appointments.map((appointment, index) => (
             <TableRow key={appointment._id}>
-              <TableCell>{index + 1}</TableCell>
+              <TableCell>{appointments.length - index}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Avatar>
@@ -117,7 +120,10 @@ export default function DoctorAppointments() {
               <TableCell>
                 {formatSlotDate(appointment.slotDate)}, {appointment.slotTime}
               </TableCell>
-              <TableCell>${appointment.amount}</TableCell>
+              <TableCell>
+                {currencySymbol}
+                {appointment.amount}
+              </TableCell>
               <TableCell>
                 {appointment.cancelled ? (
                   <span className="text-red-400 text-xs font-medium">

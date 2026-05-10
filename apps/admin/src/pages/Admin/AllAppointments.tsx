@@ -26,7 +26,7 @@ export default function AllAppointments() {
       const data = await api
         .get("admin/appointments")
         .json<{ success: boolean; appointments: Appointment[] }>();
-      return data.appointments;
+      return [...data.appointments].reverse();
     },
   });
 
@@ -65,80 +65,82 @@ export default function AllAppointments() {
     return `${day} ${months[Number(month) - 1]} ${year}`;
   };
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>#</TableHead>
-          <TableHead>Patient</TableHead>
-          <TableHead>Age</TableHead>
-          <TableHead>Date & Time</TableHead>
-          <TableHead>Doctor</TableHead>
-          <TableHead>Fees</TableHead>
-          <TableHead>Action</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {appointments.map((appointment, index) => (
-          <TableRow key={appointment._id}>
-            <TableCell>{index + 1}</TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <Avatar>
-                  <AvatarImage
-                    src={appointment.userData.image ?? fallbackImg}
-                    alt={appointment.userData.name}
-                  />
-                  <AvatarFallback>
-                    {appointment.userData.name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <p>{appointment.userData.name}</p>
-              </div>
-            </TableCell>
-            <TableCell>{calculateAge(appointment.userData.dob)}</TableCell>
-            <TableCell>
-              {formatSlotDate(appointment.slotDate)} {appointment.slotTime}
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <Avatar>
-                  <AvatarImage
-                    src={appointment.docData.image ?? fallbackImg}
-                    alt={appointment.docData.name}
-                  />
-                  <AvatarFallback>
-                    {appointment.docData.name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <p>{appointment.docData.name}</p>
-              </div>
-            </TableCell>
-            <TableCell>
-              {currencySymbol}
-              {appointment.amount}
-            </TableCell>
-            <TableCell>
-              {appointment.cancelled ? (
-                <span className="text-destructive text-xs font-medium">
-                  Cancelled
-                </span>
-              ) : appointment.isCompleted ? (
-                <span className="text-green-500 text-xs font-medium">
-                  Completed
-                </span>
-              ) : (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => cancelAppointment(appointment._id)}
-                >
-                  Cancel
-                </Button>
-              )}
-            </TableCell>
+    <div className="m-5">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>#</TableHead>
+            <TableHead>Patient</TableHead>
+            <TableHead>Age</TableHead>
+            <TableHead>Date & Time</TableHead>
+            <TableHead>Doctor</TableHead>
+            <TableHead>Fees</TableHead>
+            <TableHead>Action</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {appointments.map((appointment, index) => (
+            <TableRow key={appointment._id}>
+              <TableCell>{appointments.length - index}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Avatar>
+                    <AvatarImage
+                      src={appointment.userData.image ?? fallbackImg}
+                      alt={appointment.userData.name}
+                    />
+                    <AvatarFallback>
+                      {appointment.userData.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p>{appointment.userData.name}</p>
+                </div>
+              </TableCell>
+              <TableCell>{calculateAge(appointment.userData.dob)}</TableCell>
+              <TableCell>
+                {formatSlotDate(appointment.slotDate)} {appointment.slotTime}
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Avatar>
+                    <AvatarImage
+                      src={appointment.docData.image ?? fallbackImg}
+                      alt={appointment.docData.name}
+                    />
+                    <AvatarFallback>
+                      {appointment.docData.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p>{appointment.docData.name}</p>
+                </div>
+              </TableCell>
+              <TableCell>
+                {currencySymbol}
+                {appointment.amount}
+              </TableCell>
+              <TableCell>
+                {appointment.cancelled ? (
+                  <span className="text-destructive text-xs font-medium">
+                    Cancelled
+                  </span>
+                ) : appointment.isCompleted ? (
+                  <span className="text-green-500 text-xs font-medium">
+                    Completed
+                  </span>
+                ) : (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => cancelAppointment(appointment._id)}
+                  >
+                    Cancel
+                  </Button>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

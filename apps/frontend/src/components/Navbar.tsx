@@ -1,7 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
 import { CalendarRange } from "lucide-react";
-import { useState } from "react";
 import { NavLink, useNavigate } from "react-router";
-import { assets } from "@/assets/assets_frontend/assets";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
+import type { UserProfile } from "@/pages/Profile";
+import { useUserStore } from "@/state/useUserStore";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -15,51 +19,75 @@ import {
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const [token, setToken] = useState(true);
+  const { isLoggedIn, logout } = useUserStore();
+
+  const { data } = useQuery({
+    queryKey: ["user", "profile"],
+    queryFn: async () => {
+      const data = await api
+        .get("user/get-profile")
+        .json<{ success: boolean; user: UserProfile }>();
+      return data.user;
+    },
+    enabled: isLoggedIn,
+  });
+
+  const handleLogout = async () => {
+    try {
+      await api.post("user/logout");
+    } finally {
+      logout();
+      navigate("/");
+      toast.success("Logged out successfully");
+    }
+  };
 
   return (
-    <header className="flex py-2 border-b">
-      <nav className="font-medium flex items-center text-sm gap-6 container">
+    <header className="py-2 border-b">
+      <nav className="font-medium flex items-center justify-between text-sm  container">
         <div
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 font-semibold mr-auto"
+          className="flex items-center gap-2 font-semibold"
         >
           <CalendarRange className="size-6" />
           <span className="sr-only md:not-sr-only text-xl">HealthBridge</span>
         </div>
-        <NavLink
-          to={"/"}
-          className="transition-colors text-muted-foreground hover:text-foreground"
-        >
-          Home
-        </NavLink>
-        <NavLink
-          to={"/doctors"}
-          className="transition-colors text-muted-foreground hover:text-foreground"
-        >
-          All Doctors
-        </NavLink>
-        <NavLink
-          to={"/about"}
-          className="transition-colors text-muted-foreground hover:text-foreground"
-        >
-          About
-        </NavLink>
-        <NavLink
-          to={"/contact"}
-          className="transition-colors text-muted-foreground hover:text-foreground"
-        >
-          Contact
-        </NavLink>
-        <div className="ml-auto">
-          {token ? (
+        <div className="flex gap-6 items-center">
+          <NavLink
+            to={"/"}
+            className="transition-colors text-muted-foreground hover:text-foreground"
+          >
+            Home
+          </NavLink>
+          <NavLink
+            to={"/doctors"}
+            className="transition-colors text-muted-foreground hover:text-foreground"
+          >
+            All Doctors
+          </NavLink>
+          <NavLink
+            to={"/about"}
+            className="transition-colors text-muted-foreground hover:text-foreground"
+          >
+            About
+          </NavLink>
+          <NavLink
+            to={"/contact"}
+            className="transition-colors text-muted-foreground hover:text-foreground"
+          >
+            Contact
+          </NavLink>
+        </div>
+        <div>
+          {isLoggedIn ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <img
-                  src={assets.profile_pic}
-                  className="w-8 rounded-full"
-                  alt=""
-                />
+                <Avatar className="size-8 cursor-pointer">
+                  <AvatarImage src={data?.image ?? ""} alt={data?.name} />
+                  <AvatarFallback>
+                    {data?.name?.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuGroup>
@@ -75,7 +103,7 @@ export default function Navbar() {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={() => setToken(false)}>
+                  <DropdownMenuItem onClick={handleLogout}>
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuGroup>

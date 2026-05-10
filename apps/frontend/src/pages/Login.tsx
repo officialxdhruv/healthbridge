@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import { useUserStore } from "@/state/useUserStore";
 
 export default function Login() {
   const [state, setState] = useState<"Sign Up" | "Login">("Sign Up");
@@ -40,6 +41,7 @@ export default function Login() {
           ? "Account created successfully"
           : "Logged in successfully",
       );
+      useUserStore.getState().setLoggedIn(true);
       navigate("/");
     },
     onError: (error) => {

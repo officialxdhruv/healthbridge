@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 export default function About() {
   return (
     <div>
-      <div className="text-center text-2xl pt-10">
+      <div className="text-center text-2xl">
         <p className="font-bold">ABOUT US</p>
       </div>
 

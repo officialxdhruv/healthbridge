@@ -14,6 +14,8 @@ export const env = createEnv({
     CLOUDINARY_API_SECRET: z.string().min(1),
     ADMIN_EMAIL: z.email(),
     ADMIN_PASSWORD: z.string().min(8),
+    RAZORPAY_KEY_ID: z.string().min(1),
+    RAZORPAY_KEY_SECRET: z.string().min(1),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

@@ -1,9 +1,12 @@
+import type { User } from "@healthbridge/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { assets } from "@/assets/assets_frontend/assets";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -11,24 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { api } from "@/lib/api";
-
-export type UserProfile = {
-  _id: string;
-  name: string;
-  email: string;
-  image: string;
-  phone: string | null;
-  gender: "Male" | "Female" | "Other" | "Not Selected";
-  dob: Date | null;
-  address: {
-    line1: string;
-    line2?: string;
-    city?: string;
-    state?: string;
-  };
-};
 
 export default function Profile() {
   const { data: userData, refetch } = useQuery({
@@ -36,14 +22,17 @@ export default function Profile() {
     queryFn: async () => {
       const data = await api
         .get("user/get-profile")
-        .json<{ success: boolean; user: UserProfile }>();
+        .json<{ success: boolean; user: User }>();
       return data.user;
     },
   });
 
   const [isEdit, setIsEdit] = useState(false);
   const [image, setImage] = useState<File | null>(null);
-  const [form, setForm] = useState<UserProfile | undefined>(userData);
+  const [form, setForm] = useState<User | undefined>(userData);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (userData) setForm(userData);
@@ -72,114 +61,147 @@ export default function Profile() {
   });
 
   if (!userData || !form) return null;
-
   return (
-    <div className="max-w-lg flex flex-col gap-2 text-sm pt-5">
-      {isEdit ? (
-        <label htmlFor="image">
-          <div className="inline-block relative cursor-pointer">
-            <img
-              className="w-36 rounded opacity-75"
-              src={image ? URL.createObjectURL(image) : String(userData.image)}
-              alt=""
-            />
-            <img
-              className="w-10 absolute bottom-12 right-12"
-              src={image ? "" : assets.upload_icon}
-              alt=""
-            />
+    <div className="max-w-2xl pt-5 space-y-6">
+      <Card>
+        <CardContent className="pt-6 flex items-center gap-6">
+          {isEdit ? (
+            <div className="flex flex-col items-center gap-2">
+              <Label htmlFor="image" className="cursor-pointer">
+                <Avatar className="size-24 border-primary border-2">
+                  <AvatarImage
+                    src={preview ?? userData.image ?? undefined}
+                    alt={userData.name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="text-2xl">
+                    {userData.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                id="image"
+                hidden
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  setImage(file);
+                  if (file) setPreview(URL.createObjectURL(file));
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Upload
+              </Button>
+            </div>
+          ) : (
+            <Avatar className="size-24">
+              <AvatarImage
+                src={userData.image || undefined}
+                alt={userData.name}
+                className="object-cover"
+              />
+              <AvatarFallback className="text-2xl">
+                {userData.name.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          )}
+
+          <div className="flex-1">
+            {isEdit ? (
+              <Input
+                className="text-2xl font-medium"
+                value={form.name}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev!, name: e.target.value }))
+                }
+              />
+            ) : (
+              <p className="text-2xl font-semibold">{userData.name}</p>
+            )}
+            <p className="text-sm text-muted-foreground">{userData.email}</p>
           </div>
-          <input
-            onChange={(e) => {
-              if (e.target.files) setImage(e.target.files[0] ?? null);
-            }}
-            type="file"
-            id="image"
-            hidden
-          />
-        </label>
-      ) : (
-        <img className="w-36 rounded" src={String(userData.image)} alt="" />
-      )}
+        </CardContent>
+      </Card>
 
-      {isEdit ? (
-        <Input
-          className="text-3xl font-medium max-w-60"
-          type="text"
-          onChange={(e) =>
-            setForm((prev) => ({ ...prev!, name: e.target.value }))
-          }
-          value={form.name}
-        />
-      ) : (
-        <p className="font-medium text-3xl mt-4">{userData.name}</p>
-      )}
-
-      <Separator />
-
-      <div>
-        <p className="underline mt-3">CONTACT INFORMATION</p>
-        <div className="grid grid-cols-[1fr_3fr] gap-y-2.5 mt-3 text-muted-foreground">
-          <p className="font-medium">Email id:</p>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Contact Information</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-[1fr_2fr] gap-y-4 text-sm">
+          <p className="font-medium text-muted-foreground">Email</p>
           <p>{userData.email}</p>
 
-          <p className="font-medium">Phone:</p>
+          <p className="font-medium text-muted-foreground">Phone</p>
           {isEdit ? (
             <Input
               className="max-w-52"
-              type="text"
+              value={form.phone ?? ""}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev!, phone: e.target.value }))
               }
-              value={form.phone ?? ""}
             />
           ) : (
-            <p>{userData.phone}</p>
+            <p>{userData.phone ?? "Not set"}</p>
           )}
 
-          <p className="font-medium">Address:</p>
+          <p className="font-medium text-muted-foreground">Address</p>
           {isEdit ? (
-            <p className="grid gap-2">
+            <div className="grid gap-2">
               <Input
-                type="text"
+                value={form.address?.line1 ?? ""}
                 onChange={(e) =>
                   setForm((prev) => ({
                     ...prev!,
                     address: { ...prev!.address, line1: e.target.value },
                   }))
                 }
-                value={form.address?.line1 ?? ""}
+                placeholder="Address line 1"
               />
               <Input
-                type="text"
+                value={form.address?.line2 ?? ""}
                 onChange={(e) =>
                   setForm((prev) => ({
                     ...prev!,
                     address: { ...prev!.address, line2: e.target.value },
                   }))
                 }
-                value={form.address?.line2 ?? ""}
+                placeholder="Address line 2"
               />
-            </p>
+            </div>
           ) : (
             <p>
-              {userData.address?.line1} <br /> {userData.address?.line2}
+              {userData.address?.line1}
+              {userData.address?.line2 && (
+                <>
+                  <br />
+                  {userData.address.line2}
+                </>
+              )}
             </p>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div>
-        <p className="underline mt-3">BASIC INFORMATION</p>
-        <div className="grid grid-cols-[1fr_3fr] gap-y-2.5 mt-3 text-muted-foreground">
-          <p className="font-medium">Gender:</p>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Basic Information</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-[1fr_2fr] gap-y-4 text-sm">
+          <p className="font-medium text-muted-foreground">Gender</p>
           {isEdit ? (
             <Select
-              value={form.gender ?? "Not Selected"} // gender select onValueChange
+              value={form.gender ?? "Not Selected"}
               onValueChange={(value) =>
                 setForm((prev) => ({
                   ...prev!,
-                  gender: value as UserProfile["gender"],
+                  gender: value as User["gender"],
                 }))
               }
             >
@@ -190,22 +212,23 @@ export default function Profile() {
                 <SelectItem value="Not Selected">Not Selected</SelectItem>
                 <SelectItem value="Male">Male</SelectItem>
                 <SelectItem value="Female">Female</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
           ) : (
             <p>{userData.gender}</p>
           )}
 
-          <p className="font-medium">Birthday:</p>
+          <p className="font-medium text-muted-foreground">Birthday</p>
           {isEdit ? (
             <Input
               className="max-w-45"
               type="date"
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev!, dob: new Date(e.target.value) }))
-              }
               value={
                 form.dob ? new Date(form.dob).toISOString().split("T")[0] : ""
+              }
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev!, dob: new Date(e.target.value) }))
               }
             />
           ) : (
@@ -215,14 +238,26 @@ export default function Profile() {
                 : "Not set"}
             </p>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="mt-10">
+      <div className="flex gap-2">
         {isEdit ? (
-          <Button onClick={() => updateProfile()} disabled={isPending}>
-            {isPending ? "Saving..." : "Save information"}
-          </Button>
+          <>
+            <Button onClick={() => updateProfile()} disabled={isPending}>
+              {isPending ? "Saving..." : "Save information"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEdit(false);
+                setPreview(null);
+                setImage(null);
+              }}
+            >
+              Cancel
+            </Button>
+          </>
         ) : (
           <Button onClick={() => setIsEdit(true)}>Edit</Button>
         )}

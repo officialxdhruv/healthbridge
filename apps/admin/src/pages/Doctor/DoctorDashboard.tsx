@@ -1,6 +1,6 @@
 import type { Appointment } from "@healthbridge/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarIcon, StethoscopeIcon, UsersIcon } from "lucide-react";
+import { BadgeIndianRupeeIcon, CalendarIcon, UsersIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
 
 type DashData = {
-  doctors: number;
+  earnings: number;
   appointments: number;
   patients: number;
   latestAppointments: Appointment[];
@@ -60,7 +60,11 @@ export default function Dashboard() {
   if (!dashData) return null;
 
   const stats = [
-    { label: "Doctors", value: dashData.doctors, icon: StethoscopeIcon },
+    {
+      label: "Earnings",
+      value: `₹${dashData.earnings}`,
+      icon: BadgeIndianRupeeIcon,
+    },
     { label: "Appointments", value: dashData.appointments, icon: CalendarIcon },
     { label: "Patients", value: dashData.patients, icon: UsersIcon },
   ];

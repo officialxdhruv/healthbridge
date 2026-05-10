@@ -39,6 +39,11 @@ export function loginAdmin(req: Request, res: Response) {
   res.json({ success: true });
 }
 
+export function logoutAdmin(_req: Request, res: Response) {
+  res.clearCookie("admin-token");
+  res.json({ success: true, message: "Logged out successfully" });
+}
+
 export async function addDoctor(req: Request, res: Response) {
   const imageFile = req.file;
 

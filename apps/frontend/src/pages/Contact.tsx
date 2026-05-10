@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 
 export default function Contact() {
   return (
-    <div>
-      <div className="text-center text-2xl pt-10">
+    <>
+      <div className="text-center text-2xl">
         <p className="font-semibold">CONTACT US</p>
       </div>
 
@@ -30,6 +30,6 @@ export default function Contact() {
           <Button>Explore Jobs</Button>
         </div>
       </div>
-    </div>
+    </>
   );
 }

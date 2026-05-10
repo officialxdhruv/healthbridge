@@ -100,6 +100,11 @@ export async function appointmentCancel(req: Request, res: Response) {
   res.json({ success: true, message: "Appointment cancelled successfully" });
 }
 
+export function logoutDoctor(_req: Request, res: Response) {
+  res.clearCookie("doctor-token");
+  res.json({ success: true, message: "Logged out successfully" });
+}
+
 export async function appointmentComplete(req: Request, res: Response) {
   const result = appointmentIdSchema.safeParse(req.body);
   if (!result.success)
@@ -158,7 +163,7 @@ export async function doctorDashboard(req: Request, res: Response) {
   const patientSet = new Set<string>();
 
   appointments.forEach((a) => {
-    if (a.isCompleted || a.payment) earnings += a.amount;
+    if (!a.cancelled && (a.isCompleted || a.payment)) earnings += a.amount;
     patientSet.add(a.userId.toString());
   });
 

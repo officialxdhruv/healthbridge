@@ -1,6 +1,7 @@
 import { CalendarRange } from "lucide-react";
 import { useNavigate } from "react-router";
-// import { assets } from "@/assets/assets_admin/assets";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
 import { useAuthStore } from "@/state/useAuthStore";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -9,9 +10,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { role, logout } = useAuthStore();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await api.post(role === "Admin" ? "admin/logout" : "doctor/logout");
+    } finally {
+      logout();
+      navigate("/");
+      toast.success("Logged out successfully");
+    }
   };
 
   return (

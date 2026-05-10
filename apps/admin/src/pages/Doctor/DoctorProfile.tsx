@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
+import { useAppStore } from "@/state/useAppStore";
 
 type DoctorProfile = Omit<Doctor, "slotsBooked">;
 
@@ -27,6 +28,7 @@ const formSchema = z.object({
 
 export default function DoctorProfile() {
   const [isEdit, setIsEdit] = useState(false);
+  const {currencySymbol} = useAppStore();
 
   const { data: profileData, refetch } = useQuery({
     queryKey: ["doctor", "profile"],
@@ -154,7 +156,7 @@ export default function DoctorProfile() {
                         )}
                       </div>
                     ) : (
-                      <p>${profileData.fees}</p>
+                      <p>{currencySymbol}{profileData.fees}</p>
                     )}
                   </div>
                 );
