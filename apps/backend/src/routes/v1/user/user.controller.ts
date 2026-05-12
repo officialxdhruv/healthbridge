@@ -51,7 +51,7 @@ export async function registerUser(req: Request, res: Response) {
   res.cookie("user-token", token, {
     httpOnly: true, // JS can't access it — XSS safe
     secure: env.NODE_ENV === "production", // HTTPS only in production
-    sameSite: "strict", // CSRF protection
+    sameSite: "lax", // CSRF protection
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
@@ -88,7 +88,7 @@ export async function loginUser(req: Request, res: Response) {
   res.cookie("user-token", token, {
     httpOnly: true, // JS can't access it — XSS safe
     secure: env.NODE_ENV === "production", // HTTPS only in production
-    sameSite: "strict", // CSRF protection
+    sameSite: "lax", // CSRF protection
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 

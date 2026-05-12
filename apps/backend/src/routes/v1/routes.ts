@@ -12,6 +12,7 @@ import {
 import doctorRouter from "./doctor/doctor.route";
 import { loginUser, logoutUser, registerUser } from "./user/user.controller";
 import userRouter from "./user/user.route";
+import google from "./google/google.route";
 
 const v1 = Router();
 
@@ -31,5 +32,9 @@ v1.post("/user/register", registerUser);
 v1.post("/user/login", loginUser);
 v1.post("/user/logout", logoutUser);
 v1.use("/user", authUser, userRouter);
+
+
+// google
+v1.use("/auth", authUser, google)
 
 export default v1;

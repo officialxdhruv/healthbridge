@@ -1,16 +1,11 @@
 import type { Appointment } from "@healthbridge/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type RazorpayOrderOptions, useRazorpay } from "react-razorpay";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { api } from "@/lib/api";
-
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
 
 const MyAppointments = () => {
   const queryClient = useQueryClient();
@@ -57,30 +52,23 @@ const MyAppointments = () => {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const { Razorpay } = useRazorpay();
+
   const { mutate: payAppointment } = useMutation({
     mutationFn: async (appointmentId: string) => {
-      if (!window.Razorpay) throw new Error("Razorpay SDK not loaded");
-
-      // step 1 — create order (like appointmentRazorpay)
       const data = await api
-        .post("user/create-razorpay-order", {
-          json: { appointmentId },
-        })
+        .post("user/create-razorpay-order", { json: { appointmentId } })
         .json<{ success: boolean; order: any }>();
 
-      // step 2 — open checkout (like initPay)
       return new Promise((resolve, reject) => {
-        const rzp = new window.Razorpay({
+        const options: RazorpayOrderOptions = {
           key: import.meta.env.VITE_RAZORPAY_KEY_ID,
           amount: data.order.amount,
           currency: data.order.currency,
           name: "HealthBridge",
           description: "Appointment Payment",
           order_id: data.order.id,
-          receipt: data.order.receipt,
-
-          // step 3 — verify (like verifyRazorpay handler)
-          handler: async (response: any) => {
+          handler: async (response) => {
             await api.post("user/verify-razorpay-payment", {
               json: { razorpay_order_id: response.razorpay_order_id },
             });
@@ -89,7 +77,15 @@ const MyAppointments = () => {
           modal: {
             ondismiss: () => reject(new Error("Payment cancelled")),
           },
-        });
+          prefill: {
+            name: "HealthBridge User",
+          },
+          theme: {
+            color: "#000000",
+          },
+        };
+
+        const rzp = new Razorpay(options);
         rzp.open();
       });
     },
@@ -114,7 +110,7 @@ const MyAppointments = () => {
               <AvatarImage
                 src={item.docData.image || undefined}
                 alt={item.docData.name}
-                className="object-cover"
+                className="object-cover bg-primary dark:bg-primary-foreground"
               />
               <AvatarFallback className="rounded-lg text-xl">
                 {item.docData.name.slice(0, 2).toUpperCase()}

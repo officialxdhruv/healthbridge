@@ -2,6 +2,7 @@ import type { User } from "@healthbridge/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { GoogleCalendarSettings } from "@/components/GoogleCalendarSettings";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGoogleCallback } from "@/hooks/useGoogleCallback";
 import { api } from "@/lib/api";
 
 export default function Profile() {
@@ -59,6 +61,8 @@ export default function Profile() {
       toast.error(error.message);
     },
   });
+
+  useGoogleCallback();
 
   if (!userData || !form) return null;
   return (
@@ -240,6 +244,8 @@ export default function Profile() {
           )}
         </CardContent>
       </Card>
+      
+      <GoogleCalendarSettings />
 
       <div className="flex gap-2">
         {isEdit ? (
