@@ -23,15 +23,17 @@ const userSchema = new mongoose.Schema(
     },
     dob: { type: Date, default: null },
     phone: { type: String, default: null },
-    isGoogleLinked: { type: Boolean, default: false },
     googleTokens: {
-      access_token: { type: String, select: false },   // never return in queries
-      refresh_token: { type: String, select: false },  // sensitive data
-      expiry_date: { type: Number, select: false },
+      access_token: String,
+      refresh_token: String,
+      scope: String,
+      token_type: String,
+      expiry_date: Number, // Use Number for the timestamp
     },
+    isGoogleLinked: { type: Boolean, default: false },
   },
   { timestamps: true },
-)
+);
 
 export const User = model("user", userSchema);
 export type UserSchema = InferSchemaType<typeof userSchema>;

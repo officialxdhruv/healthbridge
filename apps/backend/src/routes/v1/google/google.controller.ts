@@ -1,14 +1,8 @@
 import type { Request, Response } from "express";
-import { google } from "googleapis";
+import oauth2Client from "@/config/google";
 import { env } from "@/env";
 import { EntityNotFoundError } from "@/errors";
 import { User } from "@/models/userModel";
-
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI,
-);
 
 // STEP 1: Redirect user to Google
 export const connectGoogle = (_req: Request, res: Response) => {

@@ -1,7 +1,7 @@
 import { genSalt, hash } from "bcrypt-ts";
-import { v2 as cloudinary } from "cloudinary";
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import cloudinary from "@/config/cloudinary";
 import { env } from "@/env";
 import { EntityNotFoundError, ValidationError } from "@/errors";
 import { Appointment } from "@/models/appointmentModel";
