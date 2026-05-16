@@ -110,7 +110,7 @@ const MyAppointments = () => {
               <AvatarImage
                 src={item.docData.image || undefined}
                 alt={item.docData.name}
-                className="object-cover bg-primary dark:bg-primary-foreground"
+                className="object-cover bg-accent"
               />
               <AvatarFallback className="rounded-lg text-xl">
                 {item.docData.name.slice(0, 2).toUpperCase()}

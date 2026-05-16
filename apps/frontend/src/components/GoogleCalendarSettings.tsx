@@ -25,10 +25,20 @@ export function GoogleCalendarSettings() {
       </CardHeader>
       <CardContent className="flex items-center justify-between">
         {data ? (
-          <Button variant="ghost" className="text-green-500">
-            <CircleCheckIcon className="size-3" />
-            Active
-          </Button>
+          <>
+            <Button variant="ghost" className="text-green-500">
+              <CircleCheckIcon className="size-3" />
+              Active
+            </Button>
+            <Button
+              size="sm"
+              onClick={() =>
+                (window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google`)
+              }
+            >
+              Connect Google
+            </Button>
+          </>
         ) : (
           <>
             <p className="text-sm text-muted-foreground">

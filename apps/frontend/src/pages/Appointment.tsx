@@ -110,7 +110,7 @@ export default function Appointment() {
 
         <div className="md:w-60 h-69 shrink-0">
           <img
-            className="w-full h-full rounded-xl object-contain md:object-cover bg-primary dark:bg-primary-foreground"
+            className="w-full h-full rounded-xl object-contain md:object-cover bg-accent"
             src={docInfo.image}
             alt={docInfo.name}
           />

@@ -1,12 +1,12 @@
-import { useContext } from "react";
 import { useNavigate } from "react-router";
-import { AppContext } from "@/context/AppContext";
+import { useDoctors } from "@/hooks/useDoctors";
+import DoctorCard from "./DoctorCard";
 import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
 
 export default function TopDoctors() {
   const navigate = useNavigate();
-  const { doctors } = useContext(AppContext);
+  const { data: doctors = [] } = useDoctors();
+
   return (
     <div className="flex flex-col items-center gap-4 my-16 md:mx-10">
       <h1 className="text-3xl font-medium">Top Doctor to Book</h1>
@@ -14,36 +14,19 @@ export default function TopDoctors() {
         Simply browse through our extensive list of trusted doctors
       </p>
       <div className="w-full grid grid-cols-5 gap-4 pt-5 gap-y-6 px-3 sm:px-0">
-        {doctors.slice(0, 10).map((item, index) => (
-          <Card
-            onClick={() => {
-              navigate(`/appointment/${item._id}`);
-              scrollTo({ left: 0, top: 0, behavior: "instant" });
-            }}
-            className="cursor-pointer hover:-translate-y-2.5 transition-all duration-500"
-            key={index}
-          >
-            <img className="bg-accent" src={item.image} alt={item.name} />
-            <CardContent>
-              <div className="flex items-center gap-2 text-sm text-center text-green-500 ">
-                <p className="size-2 bg-green-500 rounded-full"></p>{" "}
-                <p>Available</p>
-              </div>
-              <p className="text-lg font-medium">{item.name}</p>
-              <p className="text-sm text-muted-foreground">{item.speciality}</p>
-            </CardContent>
-          </Card>
+        {doctors.slice(0, 10).map((doctor) => (
+          <DoctorCard key={doctor._id} doctor={doctor} />
         ))}
       </div>
       <Button
         onClick={() => {
           navigate("/doctors");
-          scroll(0, 0);
+          scrollTo(0, 0);
         }}
         className="mt-10"
-        variant={"outline"}
+        variant="outline"
       >
-        more
+        More
       </Button>
     </div>
   );

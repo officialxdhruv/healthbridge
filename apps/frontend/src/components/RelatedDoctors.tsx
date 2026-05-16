@@ -1,9 +1,7 @@
-import { useContext } from "react";
 import { useNavigate } from "react-router";
-import type { Doctors } from "@/assets/assets_frontend/assets";
-import { AppContext } from "@/context/AppContext";
+import { useDoctors } from "@/hooks/useDoctors";
+import DoctorCard from "./DoctorCard";
 import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
 
 export default function RelatedDoctors({
   docId,
@@ -12,15 +10,12 @@ export default function RelatedDoctors({
   docId: string;
   speciality: string;
 }) {
-  const { doctors } = useContext(AppContext);
   const navigate = useNavigate();
+  const { data: doctors = [] } = useDoctors();
 
-  let doctorsData: Doctors = [];
-  if (doctors.length > 0 && speciality) {
-    doctorsData = doctors.filter(
-      (doc) => doc.speciality === speciality && doc._id !== docId,
-    );
-  }
+  const relatedDoctors = doctors
+    .filter((doc) => doc.speciality === speciality && doc._id !== docId)
+    .slice(0, 5);
 
   return (
     <div className="flex flex-col items-center gap-4 my-16 md:mx-10">
@@ -29,36 +24,19 @@ export default function RelatedDoctors({
         Simply browse through our extensive list of trusted doctors
       </p>
       <div className="w-full grid grid-cols-5 gap-4 pt-5 gap-y-6 px-3 sm:px-0">
-        {doctorsData.slice(0, 5).map((item, index) => (
-          <Card
-            onClick={() => {
-              navigate(`/appointment/${item._id}`);
-              scrollTo(0, 0);
-            }}
-            className="cursor-pointer hover:-translate-y-2.5 transition-all duration-500"
-            key={index}
-          >
-            <img className="bg-accent" src={item.image} alt={item._id} />
-            <CardContent>
-              <div className="flex items-center gap-2 text-sm text-center text-green-500 ">
-                <p className="size-2 bg-green-500 rounded-full"></p>{" "}
-                <p>Available</p>
-              </div>
-              <p className="text-lg font-medium">{item.name}</p>
-              <p className="text-sm text-muted-foreground">{item.speciality}</p>
-            </CardContent>
-          </Card>
+        {relatedDoctors.map((doctor) => (
+          <DoctorCard key={doctor._id} doctor={doctor} />
         ))}
       </div>
       <Button
         onClick={() => {
           navigate("/doctors");
-          scroll(0, 0);
+          scrollTo(0, 0);
         }}
         className="mt-10"
-        variant={"outline"}
+        variant="outline"
       >
-        more
+        More
       </Button>
     </div>
   );
