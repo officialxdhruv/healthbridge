@@ -1,13 +1,16 @@
 {
   "name": "healthbridge",
   "module": "index.ts",
-  "type": "module",
-  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "2.4.14",
+    "@types/bun": "latest",
+    "turbo": "^2.9.6"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
   "packageManager": "bun@1.3.8",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "private": true,
   "scripts": {
     "dev": "turbo dev --ui tui",
     "build": "turbo build",
@@ -16,12 +19,9 @@
     "format": "biome format --write .",
     "check": "biome check --write ."
   },
-  "devDependencies": {
-    "@biomejs/biome": "2.4.14",
-    "@types/bun": "latest",
-    "turbo": "^2.9.6"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }

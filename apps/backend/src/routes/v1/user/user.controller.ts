@@ -1,7 +1,7 @@
 import { compare, genSalt, hash } from "bcrypt-ts";
 import { v2 as cloudinary } from "cloudinary";
+import { addMinutes, format, parse } from "date-fns";
 import type { Request, Response } from "express";
-
 import { google } from "googleapis";
 import jwt from "jsonwebtoken";
 import oauth2Client from "@/config/google";
@@ -23,6 +23,7 @@ import {
   registerSchema,
   updateProfileSchema,
 } from "@/types/user.types";
+
 export async function registerUser(req: Request, res: Response) {
   const result = registerSchema.safeParse(req.body);
   console.log(result);
@@ -191,6 +192,7 @@ export async function updateProfile(req: Request, res: Response) {
 // }
 
 export async function bookAppointment(req: Request, res: Response) {
+  // Validate request body
   const result = bookAppointmentSchema.safeParse(req.body);
   if (!result.success)
     throw new ValidationError(
@@ -200,6 +202,7 @@ export async function bookAppointment(req: Request, res: Response) {
   const { docId, slotDate, slotTime } = result.data;
   const userId = req.user?.id;
 
+  // Fetch doctor and user in parallel
   const [doctor, user] = await Promise.all([
     Doctor.findById(docId),
     User.findById(userId),
@@ -209,17 +212,17 @@ export async function bookAppointment(req: Request, res: Response) {
   if (!user) throw new EntityNotFoundError("User not found");
   if (!doctor.available) throw new ValidationError("Doctor not available");
 
-  // 1. Check Slot Availability
+  // 1. Check slot availability
   const slotsBooked = doctor.slotsBooked;
   const slotList = slotsBooked.get(slotDate) ?? [];
-  if (slotList.includes(slotTime)) {
+  if (slotList.includes(slotTime))
     throw new ValidationError("Slot not available");
-  }
 
-  // 2. Manage Google Meet Link (NEW SECTION)
+  // 2. Create Google Calendar event with Meet link (if user has linked Google account)
   let meetLink = "";
   let googleEventId = "";
-  if (user?.googleTokens?.access_token) {
+
+  if (user.googleTokens?.access_token) {
     try {
       const tokens = user.toObject().googleTokens;
       oauth2Client.setCredentials(
@@ -231,86 +234,69 @@ export async function bookAppointment(req: Request, res: Response) {
           expiry_date?: number;
         },
       );
+
       const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
-      const [rawTime = "", period = ""] = slotTime.split(" "); // ["10:00", "AM"]
+      // Parse "yyyy-MM-dd hh:mm aa" (e.g. "2026-05-17 10:00 AM") into a Date
+      // new Date(0) is used as a fixed reference to avoid server timezone affecting the parse
+      const startDate = parse(
+        `${slotDate} ${slotTime}`,
+        "yyyy-MM-dd hh:mm aa",
+        new Date(0),
+      );
 
-      if (!rawTime || !period) {
-        throw new ValidationError(
-          "Invalid time format. Expected 'HH:mm AM/PM'",
-        );
-      }
-      let [h, m] = rawTime.split(":") as [string, string]; // ["10", "00"]
+      if (Number.isNaN(startDate.getTime()))
+        throw new ValidationError("Invalid date/time format");
 
-      if (h === "12") h = "00";
-      if (period === "PM") h = (parseInt(h, 10) + 12).toString();
+      const endDate = addMinutes(startDate, 30);
 
-      const startTime24 = `${h.padStart(2, "0")}:${m}:00`;
-      const startDateTime = `${slotDate}T${startTime24}`; // "2026-05-13T10:00:00"
-
-      // 2. Calculate End Time (+30 mins) manually to avoid shifts
-      let endH = h;
-      let endM = (parseInt(m, 10) + 30).toString();
-      if (parseInt(endM, 10) >= 60) {
-        endM = (parseInt(endM, 10) - 60).toString().padStart(2, "0");
-        endH = (parseInt(h, 10) + 1).toString().padStart(2, "0");
-      } else {
-        endM = endM.padStart(2, "0");
-      }
-      const endDateTime = `${slotDate}T${endH.padStart(2, "0")}:${endM}:00`;
-
-      const event = {
-        summary: `Appointment with Dr. ${doctor.name}`,
-        description: `Healthcare session booked via HealthBridge`,
-        start: {
-          dateTime: startDateTime, // Sending exactly "2026-05-13T10:00:00"
-          timeZone: "Asia/Kolkata",
-        },
-        end: {
-          dateTime: endDateTime, // Sending exactly "2026-05-13T10:30:00"
-          timeZone: "Asia/Kolkata",
-        },
-        conferenceData: {
-          createRequest: {
-            requestId: crypto.randomUUID(),
-            conferenceSolutionKey: { type: "hangoutsMeet" },
-          },
-        },
-      };
+      // Append +05:30 offset so Google Calendar displays time in IST
+      const toIST = (date: Date) =>
+        `${format(date, "yyyy-MM-dd'T'HH:mm:ss")}+05:30`;
 
       const googleRes = await calendar.events.insert({
         calendarId: "primary",
         conferenceDataVersion: 1,
-        requestBody: event, // This fixes the 'Overload' error
+        requestBody: {
+          summary: `Appointment with Dr. ${doctor.name}`,
+          description: "Healthcare session booked via HealthBridge",
+          start: { dateTime: toIST(startDate), timeZone: "Asia/Kolkata" },
+          end: { dateTime: toIST(endDate), timeZone: "Asia/Kolkata" },
+          conferenceData: {
+            createRequest: {
+              requestId: crypto.randomUUID(),
+              conferenceSolutionKey: { type: "hangoutsMeet" },
+            },
+          },
+        },
       });
 
-      meetLink = googleRes.data.hangoutLink || "";
-      googleEventId = googleRes.data.id || "";
+      meetLink = googleRes.data.hangoutLink ?? "";
+      googleEventId = googleRes.data.id ?? "";
     } catch (err) {
+      // Non-fatal: appointment still gets booked without a Meet link
       console.error("Google Meet creation failed:", err);
     }
   }
 
-  // 3. Update Doctor Slots
+  // 3. Mark slot as booked on the doctor's record
   slotsBooked.set(slotDate, [...slotList, slotTime]);
   await Doctor.findByIdAndUpdate(docId, { slotsBooked });
 
+  // 4. Save appointment (excluding doctor's slotsBooked from snapshot)
   const { slotsBooked: _, ...docData } = doctor.toObject();
 
-  // 4. Save Appointment with the link
-  const newAppointment = new Appointment({
+  await new Appointment({
     userId,
     docId,
     userData: user.toObject(),
     docData,
     amount: doctor.fees,
-    slotTime,
     slotDate,
-    meetLink, // Save it here!
+    slotTime,
+    meetLink,
     googleEventId,
-  });
-
-  await newAppointment.save();
+  }).save();
 
   res.status(201).json({
     success: true,

@@ -1,23 +1,12 @@
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
+import { env } from "@/env";
 import { Doctor } from "@/models/doctorModel";
 
-// CLOUDINARY_URL=cloudinary://357729154999887:1Xpw64ON8dv9vFfmqDV-12NU4SI@dbgmstyza
-
-const ADMIN_EMAIL = "dhruv@gmail.com";
-const ADMIN_PASSWORD = "admin1234";
-
-// cloudinary.config({
-//   cloud_name: "dbgmstyza",
-//   api_key: "357729154999887",
-//   api_secret: "1Xpw64ON8dv9vFfmqDV-12NU4SI",
-//   secure: true,
-// });
-
 cloudinary.config({
-  cloud_name: "dpi8rto1s",
-  api_key: "562115492616729",
-  api_secret: "UQBENGbj6EBcnTVEgLug0kRdzDY",
+  cloud_name: env.CLOUDINARY_CLOUD_NAME,
+  api_key: env.CLOUDINARY_API_KEY,
+  api_secret: env.CLOUDINARY_API_SECRET,
   secure: true,
 });
 
@@ -211,7 +200,7 @@ async function seed() {
     );
   }
 
-  for (let i = 1; i < doctors.length; i++) {
+  for (let i = 0; i < doctors.length; i++) {
     const doctor = doctors[i]!;
     const imageFile = images[i % images.length]!;
 
@@ -222,12 +211,13 @@ async function seed() {
     console.log(imageFile);
 
     const uploadResult = (await fetch(
-      `https://api.cloudinary.com/v1_1/dbgmstyza/image/upload`,
+      `https://api.cloudinary.com/v1_1/dpi8rto1s/image/upload`,
       {
         method: "POST",
         body: (() => {
           const data = new FormData();
           data.append("file", Bun.file(imageFile));
+          data.append("folder", "healthbridge/doctors/profiles");
           data.append("upload_preset", "healthbridge_doctors");
           return data;
         })(),
