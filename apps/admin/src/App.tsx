@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
@@ -14,6 +14,15 @@ import { useAuthStore } from "./state/useAuthStore";
 
 function App() {
   const { role } = useAuthStore();
+
+  useEffect(() => {
+    console.log(role);
+    if (role === null) {
+      document.title = "Login";
+      return;
+    }
+    document.title = role === "Admin" ? "Admin Panel" : "Doctor Portal";
+  }, [role]);
 
   if (role === "Admin") {
     return (

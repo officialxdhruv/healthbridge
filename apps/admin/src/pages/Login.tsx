@@ -16,7 +16,7 @@ const formSchema = z.object({
 });
 
 export default function Login() {
-const [loginAs, setLoginAs] = useState<"Admin" | "Doctor">("Admin")
+  const [loginAs, setLoginAs] = useState<"Admin" | "Doctor">("Admin");
 
   const navigate = useNavigate();
 
