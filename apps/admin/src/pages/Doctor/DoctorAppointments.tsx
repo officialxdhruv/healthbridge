@@ -2,7 +2,6 @@ import type { Appointment } from "@healthbridge/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -86,7 +85,7 @@ export default function DoctorAppointments() {
           <TableRow>
             <TableHead>#</TableHead>
             <TableHead>Patient</TableHead>
-            <TableHead>Payment</TableHead>
+            <TableHead>Meet Link</TableHead>
             <TableHead>Age</TableHead>
             <TableHead>Date & Time</TableHead>
             <TableHead>Fees</TableHead>
@@ -112,9 +111,21 @@ export default function DoctorAppointments() {
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant={appointment.payment ? "default" : "outline"}>
-                  {appointment.payment ? "Online" : "Cash"}
-                </Badge>
+                {appointment.meetLink ? (
+                  <a
+                    href={appointment.meetLink}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Button size="sm" variant="outline">
+                      Join Meet
+                    </Button>
+                  </a>
+                ) : (
+                  <span className="text-xs text-muted-foreground">
+                    Not generated
+                  </span>
+                )}
               </TableCell>
               <TableCell>{calculateAge(appointment.userData.dob)}</TableCell>
               <TableCell>

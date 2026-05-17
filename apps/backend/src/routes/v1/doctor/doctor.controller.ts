@@ -57,7 +57,7 @@ export async function loginDoctor(req: Request, res: Response) {
 export async function appointmentsDoctor(req: Request, res: Response) {
   const docId = req.user?.id;
 
-  const appointments = await Appointment.find({ docId });
+  const appointments = await Appointment.find({ docId, payment: true });
 
   if (!appointments.length) {
     throw new EntityNotFoundError("No appointments found");
@@ -163,7 +163,7 @@ export async function doctorDashboard(req: Request, res: Response) {
   const patientSet = new Set<string>();
 
   appointments.forEach((a) => {
-    if (!a.cancelled && (a.isCompleted || a.payment)) earnings += a.amount;
+    if (!a.cancelled && a.payment) earnings += a.amount;
     patientSet.add(a.userId.toString());
   });
 

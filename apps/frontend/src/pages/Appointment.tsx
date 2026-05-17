@@ -191,11 +191,7 @@ export default function Appointment() {
               ))}
             </div>
 
-            <Button
-              onClick={() => bookAppointment()}
-              disabled={!slotTime || isPending}
-              className="mt-6"
-            >
+            <Button onClick={() => bookAppointment()} className="mt-6">
               {isPending ? "Booking..." : "Book an appointment"}
             </Button>
           </div>

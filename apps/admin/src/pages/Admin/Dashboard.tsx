@@ -95,13 +95,13 @@ export default function Dashboard() {
               className="flex items-center gap-3 py-2 border-b last:border-0"
             >
               <Avatar>
-                <AvatarImage src={item.docData.image} alt={item.docData.name} />
+                <AvatarImage src={item.userData.image} alt={item.userData.name} />
                 <AvatarFallback>
-                  {item.docData.name.slice(0, 2).toUpperCase()}
+                  {item.userData.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <p className="font-medium">{item.docData.name}</p>
+                <p className="font-medium">{item.userData.name}</p>
                 <p className="text-sm text-muted-foreground">
                   Booking on {formatSlotDate(item.slotDate)}
                 </p>

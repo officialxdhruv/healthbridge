@@ -38,7 +38,7 @@ export default function DoctorsList() {
           >
             <div className="w-full h-48 overflow-hidden">
               <img
-                className="w-full h-full object-cover bg-primary dark:bg-primary-foreground"
+                className="w-full h-full object-cover bg-accent"
                 src={doctor.image}
                 alt={doctor.name}
               />

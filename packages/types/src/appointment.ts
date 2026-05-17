@@ -27,4 +27,5 @@ export type Appointment = {
   isCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
+  meetLink: string;
 };
